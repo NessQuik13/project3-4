@@ -123,4 +123,7 @@ public class ArduinoControls {
         arduinoPort.closePort();
         System.out.println("Closed port");
     }
+    static String getKeypadInputs(){
+        return inputs.getKPinput();
+    }
 }

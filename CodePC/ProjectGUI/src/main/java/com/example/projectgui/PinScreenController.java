@@ -16,7 +16,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class PinScreenController{
-    private ArduinoControls arduinoController = new ArduinoControls();
     private ArrayList<String> passwords = new ArrayList<>();
     private char[] wachtwoord;
 
@@ -74,19 +73,22 @@ public class PinScreenController{
     private PasswordField pinField;
 
     protected void pinFieldRead() {
-        String wachtwoord = pinField.getText();
+        String wachtwoord = "";
+        ArduinoControls.sendData("CgetKey\n");
+        System.out.println("get key pin");
+        while (wachtwoord.length() < 4) {
+            wachtwoord = ArduinoControls.getKeypadInputs();
+            pinField.setText(pinField.getText() + "*");
+        }
         System.out.println(wachtwoord);
         pinField.setText("");
-        if (passwords.contains(String.valueOf(wachtwoord))) {
+        if (true/*passwords.contains(String.valueOf(wachtwoord))*/) {
             SceneController controller = SceneController.getInstance();
             try {
                 controller.setScene("TransactionScreenEngels.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else {
-
         }
     }
 
