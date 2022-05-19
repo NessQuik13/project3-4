@@ -11,8 +11,9 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StartScreenController {
-    private Timer timer;
+public class StartScreenController implements Runnable{
+    Thread arduino = new Thread(this);
+    Timer timer = new Timer();
     @FXML
     private Label T1;
 
@@ -47,5 +48,31 @@ public class StartScreenController {
                 });
             }
         },50);
+    }
+    public void control(boolean succes){
+        SceneController controller = SceneController.getInstance();
+        if (!succes) {
+            try {
+                controller.setScene("LanguageScreen.fxml");
+                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (succes) {
+            try {
+                controller.setScene("PinScreenEngels.FXML");
+            } catch (IOException e) {e.printStackTrace();}
+        }
+    }
+
+    @Override
+    public void run() {
+        if (!ArduinoControls.eatCard() || ArduinoControls.getCardInfo().startsWith("ER")) {
+            control(false);
+            return;
+        }
+        control(true);
+
     }
 }
