@@ -79,7 +79,7 @@ public class ArduinoControls {
             // if its over 10 seconds since a card got requested it will time out.
             if (System.currentTimeMillis() - startTime >= interval) {
                 System.out.println("Time out error");
-                sendData("CstopCard\n");
+                sendData("CcardStop\n");
                 return "ERTimeOut";
             }
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
@@ -88,10 +88,12 @@ public class ArduinoControls {
         if (!temp.equals("") && !temp.equals("error")) {
             System.out.println(temp);
             inputs.resetCardInfo();
+            sendData("CcardStop\n");
             return temp;
         }
         else {
             inputs.resetCardInfo();
+            sendData("CcardStop\n");
             return "ERcardInfo";
         }
     }

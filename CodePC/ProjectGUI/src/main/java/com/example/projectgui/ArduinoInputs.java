@@ -23,7 +23,7 @@ public class ArduinoInputs extends Thread {
         return this.KPinput;
     }
     public void resetKPinput() {this.KPinput ="";}
-    public void resetCardInfo() {this.cardInfo ="";}
+    public void resetCardInfo() {this.cardInfo = "";}
 
     private void dataProcessing() {
         System.out.println("processing");

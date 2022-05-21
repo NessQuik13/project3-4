@@ -62,7 +62,7 @@ byte pinRows[rowNum] = {23, 25, 27, 29};
 byte pinColumn[columnNum] = {22, 24, 26, 28};
 Keypad keypad = Keypad( makeKeymap(keys), pinRows, pinColumn, rowNum, columnNum);
 // functions
-String readCardDetails();
+boolean readCardDetails();
 String keypadInputs();
 void eatingCard();
 void processInputs(String);
@@ -95,17 +95,9 @@ void loop() {
     }
 
     while (checkCard) {
-        // checks for a card
-        if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-            String temp = readCardDetails();
-            if (temp.startsWith("ER")) {
-                Serial.println("CIerror");
-                checkCard = false;
-                return;
-            } else {
-                Serial.println("CI" + temp);
-                checkCard = false;
-            }
+        // reads card
+        if (readCardDetails()) {
+            checkCard = false;
         }   
     }
 
@@ -118,23 +110,30 @@ void loop() {
 }
 // functie om info op de kaart te lezen en door te geven.
 // 
-String readCardDetails() {
+boolean readCardDetails() {
+    mfrc522.PCD_Init();
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+            
     // Authenticate using key A
     String outputString = "";
     status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) {
-        return "ERcard1";
+        Serial.println("CIerCard1");
+        return false;
     }
     byte buffer[18];
     status = mfrc522.MIFARE_Read(block, buffer, &len);
     if (status != MFRC522::STATUS_OK) {
-        return "ERcard2";
+        Serial.println("CIerCard2");
+        return false;
     }
     for (uint8_t i = 0; i < 16; i++) {
         outputString = outputString + (char)buffer[i];
     }
     mfrc522.PICC_HaltA();
-    return outputString;
+    Serial.println("CI" + outputString);
+    }
+    return true;
 }
 
 void eatingCard() {
@@ -188,6 +187,7 @@ void processInputs(String input) {
         getkeyInput = false;
         eatCard = false;
         Serial.println("Rresetting");
+        return;
         // add future functions
     }
     if (input.equals("CcardInfo")) {

@@ -14,7 +14,6 @@ public class CardThread implements Runnable{
             } catch (IOException e) {
                 e.printStackTrace();
             }});
-            ArduinoControls.reset();
             return;
         }
         String temp = ArduinoControls.getCardInfo();
@@ -24,7 +23,6 @@ public class CardThread implements Runnable{
             } catch (IOException e) {
                 e.printStackTrace();
             }});
-            ArduinoControls.reset();
             return;
         }
         Platform.runLater(() -> {try {
