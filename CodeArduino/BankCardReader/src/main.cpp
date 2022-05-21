@@ -84,23 +84,17 @@ void setup() {
 }
 
 void loop() {
-    if (stringComplete) {
-        processInputs(inputString);
-        inputString = "";
-        stringComplete = false;
-    }
+    // if (stringComplete) {
+    //     processInputs(inputString);
+    //     inputString = "";
+    //     stringComplete = false;
+    // }
     
     if (eatCard) {
         eatingCard();
     }
-    delay(1000);
+
     while (checkCard) {
-        char key = keypad.getKey();
-        if (key == '*') {
-            Serial.println("");
-            checkCard = false;
-            return;
-        }
         // checks for a card
         if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
             String temp = readCardDetails();
@@ -157,7 +151,6 @@ void eatingCard() {
     }
 
     if (timeout) {
-        
         //stepper.stop();
         //stepper.runToPosition();
         Serial.println("ReatCardTime");
@@ -175,7 +168,9 @@ void serialEvent(){
   while (Serial.available()){
     char inChar = (char)Serial.read();
     if (inChar == '\n'){
-      stringComplete = true;
+      //stringComplete = true;
+      processInputs(inputString);
+      inputString = "";
       return;
     }
     inputString += inChar;
@@ -184,15 +179,15 @@ void serialEvent(){
 
 void processInputs(String input) {
     if (input.equals("")) { return;}
-    if (input.equals("AuthoriseCard")) {
+    if (input.equals("AuthoriseArduino")) {
         Serial.println("RMega2560Ready");
         return;
     }
     if (input.equals("Creset")) {
-        Serial.println("Rresetting");
         checkCard = false;
         getkeyInput = false;
         eatCard = false;
+        Serial.println("Rresetting");
         // add future functions
     }
     if (input.equals("CcardInfo")) {
