@@ -10,6 +10,11 @@ public class ArduinoControls {
     static String recDataArduino;               // storage for the received data
     static ArduinoInputs inputs;
 
+
+    static String getKeypadInputs(){
+        return inputs.getKPinput();
+    }
+
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
     static void setupCommunication() {
@@ -79,7 +84,7 @@ public class ArduinoControls {
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
         }
         String temp = inputs.getCardInfo();
-        if (!temp.equals("")) {
+        if (!temp.equals("") && !temp.equals("error")) {
             System.out.println(temp);
             return temp;
         }
@@ -118,12 +123,19 @@ public class ArduinoControls {
         sendData("CstopKey\n");
         return keys;
     }
+    // reset all commands
+    static void reset() {
+        sendData("Creset");
+        while (inputs.getRecData().equals("Rresetting")) {
+            try{
+                Thread.sleep(100);
+            } catch (InterruptedException e) {e.printStackTrace();}
+        }
+        System.out.println("All commands have been reset");
+    }
     // close port
     static void closePort() {
         arduinoPort.closePort();
         System.out.println("Closed port");
-    }
-    static String getKeypadInputs(){
-        return inputs.getKPinput();
     }
 }
