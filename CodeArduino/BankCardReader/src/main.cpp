@@ -29,6 +29,7 @@ boolean getKeyInput = false;
 boolean eatCard = false;
 boolean ejectCard = false;
 // setting up stepper
+int distanceBills = 1000;
 #define stopSwitch 7
 #define motorPin1  8      // IN1 on the ULN2003 driver
 #define motorPin2  9      // IN2 on the ULN2003 driver
@@ -36,6 +37,24 @@ boolean ejectCard = false;
 #define motorPin4  11     // IN4 on the ULN2003 driver
 #define motorInterfaceType 8
 AccelStepper stepper = AccelStepper(motorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);
+#define motorPin5  30      // IN1 on the ULN2003 driver
+#define motorPin6  31      // IN2 on the ULN2003 driver
+#define motorPin7  32     // IN3 on the ULN2003 driver
+#define motorPin8  33     // IN4 on the ULN2003 driver
+#define motorInterfaceType 8
+AccelStepper dispStepper1 = AccelStepper(motorInterfaceType, motorPin5, motorPin7, motorPin6, motorPin8);
+#define motorPin9  36      // IN1 on the ULN2003 driver
+#define motorPin10  37     // IN2 on the ULN2003 driver
+#define motorPin11  38     // IN3 on the ULN2003 driver
+#define motorPin12  39     // IN4 on the ULN2003 driver
+#define motorInterfaceType 8
+AccelStepper dispStepper2 = AccelStepper(motorInterfaceType, motorPin9, motorPin11, motorPin10, motorPin12);
+#define motorPin13  42      // IN1 on the ULN2003 driver
+#define motorPin14  43     // IN2 on the ULN2003 driver
+#define motorPin15  44     // IN3 on the ULN2003 driver
+#define motorPin16  45     // IN4 on the ULN2003 driver
+#define motorInterfaceType 8
+AccelStepper dispStepper3 = AccelStepper(motorInterfaceType, motorPin13, motorPin15, motorPin14, motorPin16);
 // creating the card
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 byte block = 4;                     // determines the block that we will read from
@@ -62,6 +81,8 @@ String keypadInputs();
 void eatingCard();
 void processInputs(String);
 void ejectingCard();
+void dispense(int, int, int);
+void dispenserHome();
 
 // setup runs once to initiate the program
 void setup() {
@@ -77,10 +98,18 @@ void setup() {
     pinMode(stopSwitch, INPUT_PULLUP);  // switch pin as input
     stepper.setMaxSpeed(1000);          // set max speed
     stepper.setAcceleration(500.0);      // set accel
+    dispStepper1.setMaxSpeed(1000);          // set max speed
+    dispStepper1.setAcceleration(500.0);      // set accel
+    dispStepper2.setMaxSpeed(1000);          // set max speed
+    dispStepper2.setAcceleration(500.0);      // set accel
+    dispStepper3.setMaxSpeed(1000);          // set max speed
+    dispStepper3.setAcceleration(500.0);      // set accel
 }
 // runs continuously to execute the program
 void loop() {
-    // runs the eatingCard function  
+    // runs the eatingCard function 
+    dispense(1,2,3);
+    dispenserHome(); 
     if (eatCard) {
         eatingCard();
     }
@@ -179,6 +208,30 @@ void serialEvent(){
     }
     inputString += inChar;
   }
+}
+void dispense(int ten, int twenty, int fifty) {
+    // for 50 euro bills
+    for(int i = 0; i < fifty; i++) {
+        dispStepper1.moveTo(dispStepper1.currentPosition() - distanceBills);
+        dispStepper1.runToPosition();
+    }
+    for(int i = 0;i < twenty; i++) {
+        dispStepper2.moveTo(dispStepper2.currentPosition() + distanceBills);
+        dispStepper2.runToPosition();
+    }
+    for(int i = 0;i < ten; i++) {
+        dispStepper3.moveTo(dispStepper3.currentPosition() - distanceBills);
+        dispStepper3.runToPosition();
+    }
+}
+void dispenserHome() {
+    dispStepper1.moveTo(0);
+    dispStepper1.runToPosition();
+    dispStepper2.moveTo(0);
+    dispStepper2.runToPosition();
+    dispStepper3.moveTo(0);
+    dispStepper3.runToPosition();
+    
 }
 // processes the input string by reading it and comparing it to know inputs
 // if it finds one that fits it will execute that response

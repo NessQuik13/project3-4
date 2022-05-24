@@ -16,7 +16,7 @@ public class ArduinoControls {
 
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
-    static void setupCommunication() {
+    static boolean setupCommunication() {
         System.out.println("Getting arduino port");
         ports = SerialPort.getCommPorts();
         // checks all the ports descriptions till it finds the one with the mega
@@ -29,7 +29,7 @@ public class ArduinoControls {
         // if no port was found it will leave the function
         if (arduinoPort == null) {
             System.out.println("No suitable port found, angry");
-            return;
+            return false;
         }
         // setting up the parameters for the serial connection
         arduinoPort.setComPortParameters(115200, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
@@ -43,7 +43,7 @@ public class ArduinoControls {
         } else {
             arduinoPort.closePort();
             System.out.println("Something went wrong opening port");
-            return;
+            return false;
         }
         // initiate the authorisation of the arduino
         sendData("AuthoriseArduino\n");
@@ -58,14 +58,17 @@ public class ArduinoControls {
         } else {
             System.out.println("This is not the right arduino. Closing port");
             arduinoPort.closePort();
+            return false;
         }
         // shuts down the port when the program is closed, so it prevents the port getting stuck
         Runtime.getRuntime().addShutdownHook(new Thread(() -> arduinoPort.closePort()));
+        return true;
     }
     // sends data
     static void sendData(String data) {
         byte[] buffer= data.getBytes(StandardCharsets.US_ASCII);
-        arduinoPort.writeBytes(buffer, buffer.length);
+        if (arduinoPort.isOpen()) {arduinoPort.writeBytes(buffer, buffer.length);}
+        else { System.out.println("no port to send data too");}
     }
     // get card info from the arduino
     static String getCardInfo() {

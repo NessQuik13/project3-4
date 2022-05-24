@@ -15,14 +15,22 @@ public class WithdrawScreenController {
 
     @FXML
     private Label T1;
+
+    @FXML
+    private Label Amount;
+
+
+
+    private int Geld = 0;
+
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Kies een hoeveelheid om op te nemen");
             submitAbort.setText("Anuleren");
             submitReturn.setText("Terug");
-            submitCustom.setText("Aangepast");
+            submitReset.setText("Bedrag resetten");
         }
 
         timer = new Timer();
@@ -34,9 +42,10 @@ public class WithdrawScreenController {
 
                     @Override
                     public void run() {
+                        System.out.println("dd");
                         SceneController controller = SceneController.getInstance();
                         try {
-                            controller.setScene("StartScreen.fxml");
+                            controller.setScene("LanguageScreen.fxml");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -50,50 +59,49 @@ public class WithdrawScreenController {
     private Button submitTen;
     @FXML
     protected void submitTenAction(){
-        SceneController controller = SceneController.getInstance();
-        try {
-            controller.setScene("ContinueScreenEngels.fxml");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Geld = Geld + 10;
+        Amount.setText("€" + String.valueOf(Geld));
     }
     @FXML
     private Button submitTwenty;
     @FXML
     protected void submitTwentyAction(){
-        SceneController controller = SceneController.getInstance();
-        try {
-            controller.setScene("ContinueScreenEngels.fxml");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Geld = Geld + 20;
+        Amount.setText("€" + String.valueOf(Geld));
     }
     @FXML
     private Button submitFifty;
     @FXML
     protected void submitFiftyAction(){
-        SceneController controller = SceneController.getInstance();
-        try {
-            controller.setScene("ContinueScreenEngels.fxml");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Geld = Geld + 50;
+        Amount.setText("€" + String.valueOf(Geld));
     }
     @FXML
     private Button submitTwohundred;
     @FXML
     protected void submitTwohundredAction(){
-        SceneController controller = SceneController.getInstance();
-        try {
-            controller.setScene("ContinueScreenEngels.fxml");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Geld = Geld + 200;
+        Amount.setText("€" + String.valueOf(Geld));
     }
     @FXML
     private Button submitFivehundred;
     @FXML
     protected void submitFivehundredAction(){
+        Geld = Geld + 500;
+        Amount.setText("€" + String.valueOf(Geld));
+    }
+    @FXML
+    private Button submitReset;
+    @FXML
+    protected void submitResetAction(){
+        Geld = 0;
+        Amount.setText("€" + String.valueOf(Geld));
+    }
+
+    @FXML
+    private Button submitAmount;
+    @FXML
+    protected void submitAmountAction(){
         SceneController controller = SceneController.getInstance();
         try {
             controller.setScene("ContinueScreenEngels.fxml");
@@ -101,17 +109,8 @@ public class WithdrawScreenController {
             e.printStackTrace();
         }
     }
-    @FXML
-    private Button submitCustom;
-    @FXML
-    protected void submitCustomAction(){
-        SceneController controller = SceneController.getInstance();
-        try {
-            controller.setScene("CustomScreenEngels.fxml");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
+
     @FXML
     private Button submitReturn;
     @FXML
