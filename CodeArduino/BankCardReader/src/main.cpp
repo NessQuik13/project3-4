@@ -12,23 +12,20 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <AccelStepper.h>
-//#include <Stepper.h>
 #include <Keypad.h>
 
 #define RST_PIN         5           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
-
-
 // variables used for timer
 unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
-unsigned long activity = 0;
-unsigned long lastActivity = 0;
+unsigned long activity = 0;         // not used rn
+unsigned long lastActivity = 0;     // not used rn
 // input variables
 boolean stringComplete = false;
 String inputString = "";
 boolean checkCard = false;
-boolean getkeyInput = false;
+boolean getKeyInput = false;
 boolean eatCard = false;
 boolean ejectCard = false;
 // setting up stepper
@@ -38,39 +35,38 @@ boolean ejectCard = false;
 #define motorPin3  10     // IN3 on the ULN2003 driver
 #define motorPin4  11     // IN4 on the ULN2003 driver
 #define motorInterfaceType 8
-// int steps = 4096;
 AccelStepper stepper = AccelStepper(motorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);
-// Stepper stepper(steps, motorPin1, motorPin3, motorPin2, motorPin4);
-
 // creating the card
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
-byte block = 4;
-byte len = 18;
-byte trailerBlock = 7;
-MFRC522::StatusCode status;
-MFRC522::MIFARE_Key key;
+byte block = 4;                     // determines the block that we will read from
+byte len = 18;                      // determines the length of the array
+byte trailerBlock = 7;              // sets the length of the trailer block
+MFRC522::StatusCode status;         // will return status codes
+MFRC522::MIFARE_Key key;            // key used for authentication
 // keypad stuff
-const int rowNum = 4;
-const int columnNum = 4;
-char keys[rowNum][columnNum] = {
+const int rowNum = 4;               // number of rows on the keypad
+const int columnNum = 4;            // number of columns on the keypad
+char keys[rowNum][columnNum] = {    // layout of the keypad
   {'1','2','3','A'},
   {'4','5','6','B'},
   {'7','8','9','C'},
   {'*','0','#','D'}
 };
+// pins connected to the keypad
 byte pinRows[rowNum] = {23, 25, 27, 29}; 
 byte pinColumn[columnNum] = {22, 24, 26, 28};
-Keypad keypad = Keypad( makeKeymap(keys), pinRows, pinColumn, rowNum, columnNum);
-// functions
+Keypad keypad = Keypad( makeKeymap(keys), pinRows, pinColumn, rowNum, columnNum); // setup of the keypad object
+// all the functions used
 boolean readCardDetails();
 String keypadInputs();
 void eatingCard();
 void processInputs(String);
+void ejectingCard();
 
-
+// setup runs once to initiate the program
 void setup() {
     Serial.begin(115200); // Initialize serial communications with the PC
-    while (!Serial);    // Do nothing if no serial port is opened (added for Arduinos based on ATMEGA32U4)
+    while (!Serial);    // Do nothing if no serial port is opened
     SPI.begin();        // Init SPI bus
     mfrc522.PCD_Init(); // Init MFRC522 card    
     // Prepare the key (used both as key A and as key B)
@@ -78,96 +74,105 @@ void setup() {
     for (byte i = 0; i < 6; i++) {
         key.keyByte[i] = 0xFF;
     }
-    pinMode(stopSwitch, INPUT_PULLUP); // switch pin as input
-    stepper.setMaxSpeed(1000); // set max speed
-    stepper.setAcceleration(50.0); // set accel
+    pinMode(stopSwitch, INPUT_PULLUP);  // switch pin as input
+    stepper.setMaxSpeed(1000);          // set max speed
+    stepper.setAcceleration(500.0);      // set accel
 }
-
+// runs continuously to execute the program
 void loop() {
-    // if (stringComplete) {
-    //     processInputs(inputString);
-    //     inputString = "";
-    //     stringComplete = false;
-    // }
-    
+    // runs the eatingCard function  
     if (eatCard) {
         eatingCard();
     }
-
+    // eject card
+    if (ejectCard) {
+        ejectingCard();
+    }
+    // as long as checkCard is true it will try to read a card
     while (checkCard) {
-        // reads card
+        // if it succesfully reads a card it will set checkCard to false, ending the while loop
         if (readCardDetails()) {
             checkCard = false;
         }   
     }
-
-    while (getkeyInput) {
+    // as long as getKeyInput is true it will read the chars that the keypad sends it
+    while (getKeyInput) {
         char key = keypad.getKey();
-        if (key != NO_KEY) {
+        if (key != NO_KEY) {        // checks if key has a key stored, if so it sends it over the serial connection
             Serial.println("KP" + (String)key);
         }
     }
 }
-// functie om info op de kaart te lezen en door te geven.
-// 
+// reads the info on the card and sends it over the serial connection
+// returns true if succesful, false if not
 boolean readCardDetails() {
-    mfrc522.PCD_Init();
-    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-            
+    mfrc522.PCD_Init(); // initiate the reader
+    // if there is a new card and succesful read, execute the function
+    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) { 
     // Authenticate using key A
     String outputString = "";
+    // tries to use the authentication key and other info to authenticate the card, if this fails it will send an error code
     status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) {
         Serial.println("CIerCard1");
         return false;
     }
-    byte buffer[18];
-    status = mfrc522.MIFARE_Read(block, buffer, &len);
+    byte buffer[len]; // setting up the buffer array 
+    // reads the card and stores data in the buffer, error code if fails
+    status = mfrc522.MIFARE_Read(block, buffer, &len); 
     if (status != MFRC522::STATUS_OK) {
         Serial.println("CIerCard2");
         return false;
     }
+    // converts the bytes in the array to a string
     for (uint8_t i = 0; i < 16; i++) {
         outputString = outputString + (char)buffer[i];
     }
-    mfrc522.PICC_HaltA();
-    Serial.println("CI" + outputString);
-    }
+    mfrc522.PICC_HaltA();   // sets the card to halt, effectively putting it to sleep
+    Serial.println("CI" + outputString); // sends output over the serial connection
     return true;
+    }
+    return false;
 }
 
 void eatingCard() {
+    // setting up a millis timer
     boolean timeout = false;
     unsigned long startTime = millis();
     unsigned long currentTime = startTime;
+    // reading the stop switch and checking the timeout
+    // while they are both false it will keep running the stepper till either the timeout gets reached or the stopswitch activates
     while(digitalRead(stopSwitch) && !timeout) {
-        stepper.setSpeed(5000);
+        stepper.setSpeed(1000);
         stepper.runSpeed();
         currentTime = millis();
+        // determines of the timeout is reached
         if (currentTime - startTime >= 20000) {
             timeout = true;
         }
     }
-
+    // if the time out is reached it will send an error code over the serial connection and exit the function
     if (timeout) {
-        //stepper.stop();
-        //stepper.runToPosition();
         Serial.println("ReatCardTime");
         eatCard = false;
         return;
     }
-    //stepper.stop();
-    //stepper.runToPosition();
-    //stepper.setCurrentPosition(0);
+    // function was succesful in eating the card and will now send a confirmation over the serial connection
     Serial.println("RcardEaten");
     eatCard = false;    
 }
-
+// 
+void ejectingCard() {
+    stepper.setCurrentPosition(0);
+    stepper.moveTo(-3000);
+    stepper.runToPosition();
+}
+// this function gets triggered when there is an event on the serial line
+// it reads all the inputs and converts them to a string that gets processed
 void serialEvent(){
   while (Serial.available()){
     char inChar = (char)Serial.read();
     if (inChar == '\n'){
-      //stringComplete = true;
       processInputs(inputString);
       inputString = "";
       return;
@@ -175,7 +180,8 @@ void serialEvent(){
     inputString += inChar;
   }
 }
-
+// processes the input string by reading it and comparing it to know inputs
+// if it finds one that fits it will execute that response
 void processInputs(String input) {
     if (input.equals("")) { return;}
     if (input.equals("AuthoriseArduino")) {
@@ -184,7 +190,7 @@ void processInputs(String input) {
     }
     if (input.equals("Creset")) {
         checkCard = false;
-        getkeyInput = false;
+        getKeyInput = false;
         eatCard = false;
         Serial.println("Rresetting");
         return;
@@ -202,12 +208,12 @@ void processInputs(String input) {
     }
     if (input.equals("CgetKey")) {
         Serial.println("RgetKey");
-        getkeyInput = true;
+        getKeyInput = true;
         return;
     }
     if (input.equals("CstopKey")) {
         Serial.println("RstopKey");
-        getkeyInput = false;
+        getKeyInput = false;
         return;
     }
     if (input.equals("CeatCard")) {
