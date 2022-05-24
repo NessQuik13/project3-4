@@ -10,6 +10,10 @@ public class ArduinoControls {
     static String recDataArduino;               // storage for the received data
     static ArduinoInputs inputs;
 
+    static String getKeypadInputs(){
+        return inputs.getKPinput();
+    }
+
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
     static void setupCommunication() {
@@ -41,8 +45,9 @@ public class ArduinoControls {
             System.out.println("Something went wrong opening port");
             return;
         }
-        sendData("AuthoriseCard\n");
-        while (inputs.getRecData() == null) {
+        // initiate the authorisation of the arduino
+        sendData("AuthoriseArduino\n");
+        while (inputs.getRecData() == null) { // waits till a response gets
             System.out.println("waiting");
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
         }
@@ -57,6 +62,7 @@ public class ArduinoControls {
         // shuts down the port when the program is closed, so it prevents the port getting stuck
         Runtime.getRuntime().addShutdownHook(new Thread(() -> arduinoPort.closePort()));
     }
+    // sends data
     static void sendData(String data) {
         byte[] buffer= data.getBytes(StandardCharsets.US_ASCII);
         arduinoPort.writeBytes(buffer, buffer.length);
@@ -73,20 +79,25 @@ public class ArduinoControls {
             // if its over 10 seconds since a card got requested it will time out.
             if (System.currentTimeMillis() - startTime >= interval) {
                 System.out.println("Time out error");
-                sendData("CstopCard\n");
+                sendData("CcardStop\n");
                 return "ERTimeOut";
             }
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
         }
         String temp = inputs.getCardInfo();
-        if (!temp.equals("")) {
+        if (!temp.equals("") && !temp.equals("error")) {
             System.out.println(temp);
+            inputs.resetCardInfo();
+            sendData("CcardStop\n");
             return temp;
         }
         else {
+            inputs.resetCardInfo();
+            sendData("CcardStop\n");
             return "ERcardInfo";
         }
     }
+    // eats the pincard
     static boolean eatCard() {
         sendData("CeatCard\n");
         while (!inputs.getRecData().equals("RcardEaten")) {
@@ -118,9 +129,16 @@ public class ArduinoControls {
         sendData("CstopKey\n");
         return keys;
     }
-    // close port
-    static void closePort() {
-        arduinoPort.closePort();
-        System.out.println("Closed port");
+    // reset all commands
+    static void reset() {
+        sendData("Creset\n");
+        while (!inputs.getRecData().equals("Rresetting")) {
+            try{
+                System.out.println("waiting for confirmation");
+                Thread.sleep(100);
+            } catch (InterruptedException e) {e.printStackTrace();}
+        }
+        System.out.println("All commands have been reset");
     }
+
 }

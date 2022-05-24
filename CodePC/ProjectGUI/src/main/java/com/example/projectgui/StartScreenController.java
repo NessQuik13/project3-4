@@ -8,11 +8,14 @@ import javafx.scene.control.Label;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class StartScreenController {
-    private Timer timer;
+public class StartScreenController{
+    Runnable runnable = new CardThread();
+    Thread arduino = new Thread(runnable);
+    Timer timer = new Timer();
     @FXML
     private Label T1;
 
@@ -21,31 +24,22 @@ public class StartScreenController {
         if (!language.getIsEnglish()) {
             T1.setText("Voer Uw pas in");
         }
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable(){
-                    @Override
-                    public void run() {
-                        SceneController controller = SceneController.getInstance();
-                        if (!ArduinoControls.eatCard()) {
-                            try {
-                                controller.setScene("LanguageScreen.fxml");
-                            } catch (IOException e) {e.printStackTrace();}
-                        }
-                        if (ArduinoControls.getCardInfo().startsWith("ER")) {
-                            try {
-                                controller.setScene("LanguageScreen.fxml");
-                            } catch (IOException e) {e.printStackTrace();}
-                        }
-
-                        try {
-                            controller.setScene("PinScreenEngels.FXML");
-                        } catch (IOException e) {e.printStackTrace();}
-                    }
-                });
-            }
-        },50);
+        arduino.start();
     }
+//    public void control(boolean success) {
+//        SceneController controller = SceneController.getInstance();
+//        if (!success) {
+//            try {
+//                controller.setScene("LanguageScreen.fxml");
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        if (success) {
+//            try{
+//                controller.setScene("PinScreenEngels.fxml");
+//            } catch (IOException e) {e.printStackTrace();}
+//        }
+//    }
+
 }
