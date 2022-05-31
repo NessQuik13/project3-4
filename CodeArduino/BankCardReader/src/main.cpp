@@ -59,6 +59,7 @@ AccelStepper dispStepper3 = AccelStepper(motorInterfaceType, motorPin13, motorPi
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 byte block = 4;                     // determines the block that we will read from
 byte len = 18;                      // determines the length of the array
+int bytesToRead = 16;               // the amount of bytes to read
 byte trailerBlock = 7;              // sets the length of the trailer block
 MFRC522::StatusCode status;         // will return status codes
 MFRC522::MIFARE_Key key;            // key used for authentication
@@ -108,8 +109,8 @@ void setup() {
 // runs continuously to execute the program
 void loop() {
     // runs the eatingCard function 
-    dispense(1,2,3);
-    dispenserHome(); 
+    // dispense(1,2,3);
+    // dispenserHome(); 
     if (eatCard) {
         eatingCard();
     }
@@ -154,7 +155,7 @@ boolean readCardDetails() {
         return false;
     }
     // converts the bytes in the array to a string
-    for (uint8_t i = 0; i < 16; i++) {
+    for (uint8_t i = 0; i < bytesToRead; i++) {
         outputString = outputString + (char)buffer[i];
     }
     mfrc522.PICC_HaltA();   // sets the card to halt, effectively putting it to sleep
@@ -237,6 +238,10 @@ void dispenserHome() {
 // if it finds one that fits it will execute that response
 void processInputs(String input) {
     if (input.equals("")) { return;}
+    if (input.equals("ping")) {
+        Serial.println("pong"); 
+        return;
+    }
     if (input.equals("AuthoriseArduino")) {
         Serial.println("RMega2560Ready");
         return;

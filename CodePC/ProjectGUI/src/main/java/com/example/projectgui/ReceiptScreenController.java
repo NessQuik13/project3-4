@@ -11,14 +11,11 @@ import java.util.TimerTask;
 
 public class ReceiptScreenController {
     private Timer timer;
-
-
     @FXML
     private Label T1;
     public void initialize(){
-
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Wilt U een bon?");
             submitNo.setText("Nee");
             submitYes.setText("Ja");
@@ -28,8 +25,6 @@ public class ReceiptScreenController {
             @Override
             public void run() {
                 Platform.runLater(new Runnable(){
-
-
                     @Override
                     public void run() {
                         SceneController controller = SceneController.getInstance();
@@ -43,7 +38,6 @@ public class ReceiptScreenController {
             }
         },60000);
     }
-
     @FXML
     private Button submitNo;
     @FXML

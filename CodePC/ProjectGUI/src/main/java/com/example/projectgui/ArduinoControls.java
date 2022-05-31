@@ -3,6 +3,8 @@ package com.example.projectgui;
 import com.fazecast.jSerialComm.SerialPort;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ArduinoControls {
     static SerialPort[] ports;                  // list of all ports found
@@ -10,13 +12,18 @@ public class ArduinoControls {
     static String recDataArduino;               // storage for the received data
     static ArduinoInputs inputs;
 
-    static String getKeypadInputs(){
-        return inputs.getKPinput();
-    }
+
 
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
     static boolean setupCommunication() {
+//      if (ArduinoControls.arduinoPort != null && ArduinoControls.arduinoPort.isOpen()) {
+//          ArduinoControls.arduinoPort.closePort();
+//      }
+        if (arduinoPort != null && arduinoPort.isOpen()) {
+            System.out.println("port is already open");
+            return true;
+        }
         System.out.println("Getting arduino port");
         ports = SerialPort.getCommPorts();
         // checks all the ports descriptions till it finds the one with the mega
@@ -47,8 +54,14 @@ public class ArduinoControls {
         }
         // initiate the authorisation of the arduino
         sendData("AuthoriseArduino\n");
+        long startTime = System.currentTimeMillis();
+        long interval = 4000;
         while (inputs.getRecData() == null) { // waits till a response gets
             System.out.println("waiting");
+            if (System.currentTimeMillis() - startTime >= interval) {
+                System.out.println("Authorisation timed out");
+                return false;
+            }
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
         }
         recDataArduino = inputs.getRecData();
@@ -61,14 +74,17 @@ public class ArduinoControls {
             return false;
         }
         // shuts down the port when the program is closed, so it prevents the port getting stuck
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> arduinoPort.closePort()));
+        //Runtime.getRuntime().addShutdownHook(new Thread(() -> arduinoPort.closePort()));
         return true;
     }
     // sends data
     static void sendData(String data) {
         byte[] buffer= data.getBytes(StandardCharsets.US_ASCII);
-        if (arduinoPort.isOpen()) {arduinoPort.writeBytes(buffer, buffer.length);}
-        else { System.out.println("no port to send data too");}
+        if (arduinoPort != null && arduinoPort.isOpen()) {
+            arduinoPort.writeBytes(buffer, buffer.length);
+        } else {
+            System.out.println("no port to send data too");
+        }
     }
     // get card info from the arduino
     static String getCardInfo() {
@@ -116,21 +132,12 @@ public class ArduinoControls {
         return true;
     }
     // test method for keypad
-    static String getKeypad() {
-        String keys = "";
-        boolean loop = true;
+    static Character getKeypad() {
         System.out.println("getting keypad inputs");
-        sendData("CgetKey\n");
-        while (loop) {
-            try{ Thread.sleep(100);} catch (InterruptedException e) {e.printStackTrace();}
-            System.out.println(inputs.getKPinput());
-            keys = inputs.getKPinput();
-            if (inputs.getKPinput().endsWith("#")) {
-                loop = false;
-            }
+        while (!inputs.KPnew) {
+            try{ Thread.sleep(10);} catch (InterruptedException e) {e.printStackTrace();}
         }
-        sendData("CstopKey\n");
-        return keys;
+        return inputs.getKPinput();
     }
     // reset all commands
     static void reset() {

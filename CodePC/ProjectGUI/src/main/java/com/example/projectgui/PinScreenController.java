@@ -44,7 +44,6 @@ public class PinScreenController implements Runnable {
     @FXML
     protected void submitPinAction() {
         Singleton language = Singleton.getInstance();
-
         if (pinField.getText().equals("1234")) {
             Attempts = 3;
             SceneController controller = SceneController.getInstance();
@@ -57,40 +56,33 @@ public class PinScreenController implements Runnable {
         else if(Attempts == 1){
             if (!language.getIsEnglish()) {
                 Warning.setText("Kaart uitwerpen.....");
-                pinField.setText("");
             }
             else {
                 //Eject card
                 Warning.setText("Ejecting card......");
-                pinField.setText("");
             }
+            pinField.setText("");
         }
         else {
             Attempts = Attempts - 1;
             if (Attempts >= 2) {
                 if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " pogingen over");
-                    pinField.setText("");
-                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempts left");
-                    pinField.setText("");
-                    initialize();
                 }
             }
             else {
                 if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " poging over");
-                    pinField.setText("");
-                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempt left");
-                    pinField.setText("");
-                    initialize();
                 }
             }
+            pinField.setText("");
+            initialize();
         }
     }
 
@@ -146,56 +138,48 @@ public class PinScreenController implements Runnable {
 
     @Override
     public void run() {
-        ArduinoControls.setupCommunication();
-        ArduinoControls.inputs.resetKPinput();
-        String wachtwoord = "";
+        StringBuilder password = new StringBuilder();
+        boolean pinConfirm = false;
+        Character keyInput;
         ArduinoControls.sendData("CgetKey\n");
         System.out.println("get key pin");
-        while (wachtwoord.length() < 4) {
-            String keyInput = ArduinoControls.getKeypadInputs();
-            if(keyInput == ""){
-            }
-            else{
-                ArduinoControls.inputs.resetKPinput();
-                wachtwoord += keyInput;
-                final String ww = wachtwoord;
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        pinField.setText(ww);
+        while (!pinConfirm) {
+            keyInput = ArduinoControls.getKeypad();
+            switch (keyInput) {
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+                    if (password.length() >= 4) {
+                        password.append(keyInput);
                     }
-                });
+                }
+                case '*' -> { // removes last character
+                    if (password.length() >= 1) {
+                        password = new StringBuilder(password.substring(0, password.length() - 1));
+                    }
+                }
+                case '#' -> pinConfirm = true; // confirm pin
+                // if any other character, ignore
+                default -> System.out.println("invalid character / input, ignored");
             }
-
             try{
-                Thread.sleep(1);
+                Thread.sleep(10);
             }
             catch (Exception e){
                 e.printStackTrace();
             }
         }
         ArduinoControls.sendData("CstopKey\n");
+        final String ww = password.toString();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                pinField.setText(ww);
+            }
+        });
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 System.out.println(pinField.getText());
             }
         });
-
-
-//        if (wachtwoord.equals("1234")) {
-//            Platform.runLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    SceneController controller = SceneController.getInstance();
-//                    try {
-//                        controller.setScene("TransactionScreenEngels.fxml");
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//        }
-
     }
 }
