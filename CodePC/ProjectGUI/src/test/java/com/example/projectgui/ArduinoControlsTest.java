@@ -1,10 +1,7 @@
 package com.example.projectgui;
 
 import com.fazecast.jSerialComm.SerialPort;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -14,10 +11,21 @@ import static org.junit.jupiter.api.Assertions.*;
 class ArduinoControlsTest {
     // tests that the port is actually open and that it is connected to the port with arduino
     // connect arduino with the bank code beforehand
-    @AfterAll
-    public static void cleanUp() {
-        // to make sure tests are not getting influenced by previous tests we will close the port after every test.
-        if (ArduinoControls.arduinoPort != null && ArduinoControls.arduinoPort.isOpen()) {
+    @BeforeEach
+    public static void setUp() {
+        // Most of the arduinoControl functions need a connection to the arduino so we make sure that a connection is established
+        if (ArduinoControls.arduinoPort == null) {
+            ArduinoControls.setupCommunication();
+        }
+        if (ArduinoControls.arduinoPort != null && !ArduinoControls.arduinoPort.isOpen()) {
+            ArduinoControls.setupCommunication();
+        }
+    }
+    @AfterEach
+    public static void cleanUp () {
+        // to make sure none of the values of the previous tests get used in the next test we close the connection
+        // every time the arduino makes a new connection it resets itself. (confirm this)
+        if (ArduinoControls.arduinoPort.isOpen()) {
             ArduinoControls.arduinoPort.closePort();
         }
     }
@@ -35,19 +43,16 @@ class ArduinoControlsTest {
 //    }
     @Test
     void analyzeSetupPortStatus() throws Exception {
-        ArduinoControls.setupCommunication();
         Assertions.assertTrue(ArduinoControls.arduinoPort.isOpen());
     }
     @Test
     void analyzeSetupPortDescription() throws Exception {
-        ArduinoControls.setupCommunication();
         Assertions.assertTrue(ArduinoControls.arduinoPort.getPortDescription().contains("Arduino Mega 2560"));
     }
     // this test will test the data transfer between the pc and arduino
     // the arduino has been setup to respond to "ping" with "pong"
     @Test
     void analyzeSendData() throws Exception{
-        ArduinoControls.setupCommunication();
         ArduinoControls.sendData("ping\n");
         // to give the arduino a bit of time to respond we put the thread to sleep for a tiny bit
         try {
@@ -67,10 +72,9 @@ class ArduinoControlsTest {
 
     @Test
     void analyzeGetKeypadInputs() throws Exception {
-        ArduinoControls.setupCommunication();
         ArduinoControls.sendData("CgetKey\n");
-        Assertions.assertEquals("1", ArduinoControls.inputs.getKPinput());
-
+        // you have to manually press the 1 button on the keypad
+        Assertions.assertEquals('1', ArduinoControls.getKeypad());
     }
     @Test
     void getCardInfo() {

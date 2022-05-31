@@ -131,6 +131,16 @@ public class ArduinoControls {
         }
         return true;
     }
+    // eject the pincard
+    static boolean ejectCard() {
+        sendData("CejectCard\n");
+        while (!inputs.getRecData().equals("RcardEjected")) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {e.printStackTrace();}
+        }
+        return true;
+    }
     // test method for keypad
     static Character getKeypad() {
         System.out.println("getting keypad inputs");
