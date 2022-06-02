@@ -16,8 +16,9 @@ class ArduinoControlsTest {
         // Most of the arduinoControl functions need a connection to the arduino so we make sure that a connection is established
         if (ArduinoControls.arduinoPort == null) {
             ArduinoControls.setupCommunication();
+            return;
         }
-        if (ArduinoControls.arduinoPort != null && !ArduinoControls.arduinoPort.isOpen()) {
+        if (!ArduinoControls.arduinoPort.isOpen()) {
             ArduinoControls.setupCommunication();
         }
     }
@@ -28,6 +29,7 @@ class ArduinoControlsTest {
         if (ArduinoControls.arduinoPort.isOpen()) {
             ArduinoControls.arduinoPort.closePort();
         }
+
     }
 
     @Test

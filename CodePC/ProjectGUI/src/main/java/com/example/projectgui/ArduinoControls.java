@@ -1,10 +1,6 @@
 package com.example.projectgui;
-
 import com.fazecast.jSerialComm.SerialPort;
-
 import java.nio.charset.StandardCharsets;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class ArduinoControls {
     static SerialPort[] ports;                  // list of all ports found
@@ -12,27 +8,24 @@ public class ArduinoControls {
     static String recDataArduino;               // storage for the received data
     static ArduinoInputs inputs;
 
-
-
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
     static boolean setupCommunication() {
-//      if (ArduinoControls.arduinoPort != null && ArduinoControls.arduinoPort.isOpen()) {
-//          ArduinoControls.arduinoPort.closePort();
-//      }
-        if (arduinoPort != null && arduinoPort.isOpen()) {
+       if (arduinoPort != null && arduinoPort.isOpen()) {
             System.out.println("port is already open");
             return true;
         }
-        System.out.println("Getting arduino port");
-        ports = SerialPort.getCommPorts();
-        // checks all the ports descriptions till it finds the one with the mega
-        for (SerialPort temp : ports) {
-            if (temp.getPortDescription().contains("Arduino Mega 2560")) {
-                arduinoPort = temp;
+       if (arduinoPort == null) {
+           System.out.println("Getting arduino port");
+           ports = SerialPort.getCommPorts();
+           // checks all the ports descriptions till it finds the one with the mega
+           for (SerialPort temp : ports) {
+               if (temp.getPortDescription().contains("Arduino Mega 2560")) {
+                    arduinoPort = temp;
                 System.out.println(temp.getSystemPortName() + " has arduino attached to it, set as arduino port.");
             }
-        }
+           }
+       }
         // if no port was found it will leave the function
         if (arduinoPort == null) {
             System.out.println("No suitable port found, angry");
@@ -90,31 +83,24 @@ public class ArduinoControls {
     static String getCardInfo() {
         System.out.println("Getting card info");
         sendData("CcardInfo\n");
-        long startTime = System.currentTimeMillis();
-        long interval = 4000;
         // loop that runs till it gets the account info or it times out.
         while (inputs.getCardInfo().equals("") || inputs.getCardInfo() == null) {
             System.out.println("waiting");
             // if its over 10 seconds since a card got requested it will time out.
-            if (System.currentTimeMillis() - startTime >= interval) {
-                System.out.println("Time out error");
-                sendData("CcardStop\n");
-                return "ERTimeOut";
-            }
             try {Thread.sleep(100);} catch (Exception e) {e.printStackTrace();}
         }
         String temp = inputs.getCardInfo();
-        if (!temp.equals("") && !temp.equals("error")) {
+        if (temp.equals("") || temp.equals("erCard1") || temp.equals("erCard2") || temp.equals("timeout")) {
+            sendData("CcardStop\n");
+            System.out.println(temp);
+            inputs.resetCardInfo();
+            ejectCard();
+            return temp;
+        }
             System.out.println(temp);
             inputs.resetCardInfo();
             sendData("CcardStop\n");
             return temp;
-        }
-        else {
-            inputs.resetCardInfo();
-            sendData("CcardStop\n");
-            return "ERcardInfo";
-        }
     }
     // eats the pincard
     static boolean eatCard() {
@@ -126,13 +112,14 @@ public class ArduinoControls {
             }
             System.out.println("Waiting for card to be eaten");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {e.printStackTrace();}
         }
         return true;
     }
     // eject the pincard
     static boolean ejectCard() {
+        System.out.println("Ejecting card");
         sendData("CejectCard\n");
         while (!inputs.getRecData().equals("RcardEjected")) {
             try {
@@ -160,5 +147,4 @@ public class ArduinoControls {
         }
         System.out.println("All commands have been reset");
     }
-
 }

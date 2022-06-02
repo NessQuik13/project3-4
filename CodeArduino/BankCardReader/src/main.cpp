@@ -17,7 +17,6 @@
 #define RST_PIN         5           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
 // variables used for timer
-unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
 unsigned long activity = 0;         // not used rn
 unsigned long lastActivity = 0;     // not used rn
@@ -108,6 +107,8 @@ void setup() {
 }
 // runs continuously to execute the program
 void loop() {
+    unsigned long currentMillis = millis();
+
     // runs the eatingCard function 
     // dispense(1,2,3);
     // dispenserHome(); 
@@ -119,18 +120,89 @@ void loop() {
         ejectingCard();
     }
     // as long as checkCard is true it will try to read a card
-    while (checkCard) {
+    if (checkCard) {
+        currentMillis = millis();
         // if it succesfully reads a card it will set checkCard to false, ending the while loop
         if (readCardDetails()) {
             checkCard = false;
-        }   
+        }
+        if (currentMillis - previousMillis >= 3500) {
+            previousMillis = currentMillis;
+            Serial.println("CItimeout");
+            checkCard = false;
+        }
     }
     // as long as getKeyInput is true it will read the chars that the keypad sends it
-    while (getKeyInput) {
+    if (getKeyInput) {
         char key = keypad.getKey();
         if (key != NO_KEY) {        // checks if key has a key stored, if so it sends it over the serial connection
             Serial.println("KP" + (String)key);
         }
+    }
+}
+/*==================== functions =====================================================================================*/
+// this function gets triggered when there is an event on the serial line
+// it reads all the inputs and converts them to a string that gets processed
+void serialEvent(){
+  while (Serial.available()){
+    char inChar = (char)Serial.read();
+    if (inChar == '\n'){
+      processInputs(inputString);
+      inputString = "";
+      return;
+    }
+    inputString += inChar;
+  }
+}
+// processes the input string by reading it and comparing it to know inputs
+// if it finds one that fits it will execute that response
+void processInputs(String input) {
+    if (input.equals("")) { return;}
+    if (input.equals("ping")) {
+        Serial.println("pong"); 
+        return;
+    }
+    if (input.equals("AuthoriseArduino")) {
+        Serial.println("RMega2560Ready");
+        return;
+    }
+    if (input.equals("Creset")) {
+        checkCard = false;
+        getKeyInput = false;
+        eatCard = false;
+        ejectCard = false;
+        Serial.println("Rresetting");
+        return;
+        // add future functions
+    }
+    if (input.equals("CcardInfo")) {
+        Serial.println("RgetCI");
+        checkCard = true;
+        return;
+    }
+    if (input.equals("CcardStop")) {
+        Serial.println("RstopCI");
+        checkCard = false;
+        return;
+    }
+    if (input.equals("CgetKey")) {
+        Serial.println("RgetKey");
+        getKeyInput = true;
+        return;
+    }
+    if (input.equals("CstopKey")) {
+        Serial.println("RstopKey");
+        getKeyInput = false;
+        return;
+    }
+    if (input.equals("CeatCard")) {
+        Serial.println("ReatingCard");
+        eatCard = true;
+        return;
+    }
+    if (input.equals("CejectCard")) {
+        ejectCard = true;
+        return;
     }
 }
 // reads the info on the card and sends it over the serial connection
@@ -168,48 +240,35 @@ boolean readCardDetails() {
 void eatingCard() {
     // setting up a millis timer
     boolean timeout = false;
-    unsigned long startTime = millis();
-    unsigned long currentTime = startTime;
+    unsigned long startTime = startTime;
+    unsigned long currentTime = millis();
     // reading the stop switch and checking the timeout
     // while they are both false it will keep running the stepper till either the timeout gets reached or the stopswitch activates
-    while(digitalRead(stopSwitch) && !timeout) {
+    while(digitalRead(stopSwitch)) {
         stepper.setSpeed(1000);
         stepper.runSpeed();
         currentTime = millis();
         // determines of the timeout is reached
+        // if the time out is reached it will send an error code over the serial connection and exit the function
         if (currentTime - startTime >= 20000) {
-            timeout = true;
+            Serial.println("ReatCardTime");
+            eatCard = false;
+            return;
         }
-    }
-    // if the time out is reached it will send an error code over the serial connection and exit the function
-    if (timeout) {
-        Serial.println("ReatCardTime");
-        eatCard = false;
-        return;
     }
     // function was succesful in eating the card and will now send a confirmation over the serial connection
     Serial.println("RcardEaten");
     eatCard = false;    
 }
-// 
+// ejects the card
 void ejectingCard() {
     stepper.setCurrentPosition(0);
-    stepper.moveTo(-3000);
+    stepper.moveTo(-3000); // 3000 brings the card back far enough to take it out but it won't fall out on it's own
     stepper.runToPosition();
+    Serial.println("RcardEjected");
+    ejectCard = false;
 }
-// this function gets triggered when there is an event on the serial line
-// it reads all the inputs and converts them to a string that gets processed
-void serialEvent(){
-  while (Serial.available()){
-    char inChar = (char)Serial.read();
-    if (inChar == '\n'){
-      processInputs(inputString);
-      inputString = "";
-      return;
-    }
-    inputString += inChar;
-  }
-}
+// system might be changed, left in for now
 void dispense(int ten, int twenty, int fifty) {
     // for 50 euro bills
     for(int i = 0; i < fifty; i++) {
@@ -225,62 +284,12 @@ void dispense(int ten, int twenty, int fifty) {
         dispStepper3.runToPosition();
     }
 }
+// same as above
 void dispenserHome() {
     dispStepper1.moveTo(0);
     dispStepper1.runToPosition();
     dispStepper2.moveTo(0);
     dispStepper2.runToPosition();
     dispStepper3.moveTo(0);
-    dispStepper3.runToPosition();
-    
-}
-// processes the input string by reading it and comparing it to know inputs
-// if it finds one that fits it will execute that response
-void processInputs(String input) {
-    if (input.equals("")) { return;}
-    if (input.equals("ping")) {
-        Serial.println("pong"); 
-        return;
-    }
-    if (input.equals("AuthoriseArduino")) {
-        Serial.println("RMega2560Ready");
-        return;
-    }
-    if (input.equals("Creset")) {
-        checkCard = false;
-        getKeyInput = false;
-        eatCard = false;
-        Serial.println("Rresetting");
-        return;
-        // add future functions
-    }
-    if (input.equals("CcardInfo")) {
-        Serial.println("RgetCI");
-        checkCard = true;
-        return;
-    }
-    if (input.equals("CcardStop")) {
-        Serial.println("RstopCI");
-        checkCard = false;
-        return;
-    }
-    if (input.equals("CgetKey")) {
-        Serial.println("RgetKey");
-        getKeyInput = true;
-        return;
-    }
-    if (input.equals("CstopKey")) {
-        Serial.println("RstopKey");
-        getKeyInput = false;
-        return;
-    }
-    if (input.equals("CeatCard")) {
-        Serial.println("ReatingCard");
-        eatCard = true;
-        return;
-    }
-    if (input.equals("Cejectcard")) {
-        Serial.println("RejectingCard");
-        return;
-    }
+    dispStepper3.runToPosition();   
 }
