@@ -7,25 +7,28 @@ public class ArduinoControls {
     static SerialPort arduinoPort = null;       // port with arduino attached to it
     static String recDataArduino;               // storage for the received data
     static ArduinoInputs inputs;
+    static String accCountry;
+    static String accBank;
+    static String accNumber;
 
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
     static boolean setupCommunication() {
-       if (arduinoPort != null && arduinoPort.isOpen()) {
+        if (arduinoPort != null && arduinoPort.isOpen()) {
             System.out.println("port is already open");
             return true;
         }
-       if (arduinoPort == null) {
-           System.out.println("Getting arduino port");
-           ports = SerialPort.getCommPorts();
-           // checks all the ports descriptions till it finds the one with the mega
-           for (SerialPort temp : ports) {
-               if (temp.getPortDescription().contains("Arduino Mega 2560")) {
+        if (arduinoPort == null) {
+            System.out.println("Getting arduino port");
+            ports = SerialPort.getCommPorts();
+            // checks all the ports descriptions till it finds the one with the mega
+            for (SerialPort temp : ports) {
+                if (temp.getPortDescription().contains("Arduino Mega 2560")) {
                     arduinoPort = temp;
-                System.out.println(temp.getSystemPortName() + " has arduino attached to it, set as arduino port.");
+                    System.out.println(temp.getSystemPortName() + " has arduino attached to it, set as arduino port.");
+                }
             }
-           }
-       }
+        }
         // if no port was found it will leave the function
         if (arduinoPort == null) {
             System.out.println("No suitable port found, angry");
@@ -80,7 +83,7 @@ public class ArduinoControls {
         }
     }
     // get card info from the arduino
-    static String getCardInfo() {
+    static boolean getCardInfo() {
         System.out.println("Getting card info");
         sendData("CcardInfo\n");
         // loop that runs till it gets the account info or it times out.
@@ -95,12 +98,15 @@ public class ArduinoControls {
             System.out.println(temp);
             inputs.resetCardInfo();
             ejectCard();
-            return temp;
+            return false;
         }
-            System.out.println(temp);
-            inputs.resetCardInfo();
-            sendData("CcardStop\n");
-            return temp;
+        System.out.println(temp);
+        accNumber = temp;
+        accCountry = temp.substring(0,2);
+        accBank = temp.substring(2,6);
+        inputs.resetCardInfo();
+        sendData("CcardStop\n");
+        return true;
     }
     // eats the pincard
     static boolean eatCard() {

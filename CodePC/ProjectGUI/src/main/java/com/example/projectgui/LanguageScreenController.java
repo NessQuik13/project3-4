@@ -42,7 +42,7 @@ public class LanguageScreenController{
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("StartScreenEngels.fxml");
+            controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }

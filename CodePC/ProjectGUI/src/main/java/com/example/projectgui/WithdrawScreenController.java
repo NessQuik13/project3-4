@@ -4,13 +4,14 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class WithdrawScreenController {
-    private Timer timer;
+public class WithdrawScreenController extends API{
 
 
     @FXML
@@ -19,8 +20,6 @@ public class WithdrawScreenController {
     @FXML
     private Label Amount;
 
-
-
     private int Geld = 0;
 
     public void initialize(){
@@ -28,31 +27,11 @@ public class WithdrawScreenController {
         Singleton language = Singleton.getInstance();
         if (!language.getIsEnglish()) {
             T1.setText("Kies een hoeveelheid om op te nemen");
-            submitAbort.setText("Anuleren");
+            submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
             submitReset.setText("Bedrag resetten");
+            submitAmount.setText("Indienen");
         }
-
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable(){
-
-
-                    @Override
-                    public void run() {
-                        System.out.println("dd");
-                        SceneController controller = SceneController.getInstance();
-                        try {
-                            controller.setScene("LanguageScreen.fxml");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        },60000);
     }
 
     @FXML
@@ -102,11 +81,28 @@ public class WithdrawScreenController {
     private Button submitAmount;
     @FXML
     protected void submitAmountAction(){
-        SceneController controller = SceneController.getInstance();
+
         try {
-            controller.setScene("ContinueScreenEngels.fxml");
-        } catch (IOException e) {
+            API.withdraw("GR","KRIV","GRKRIV0000123401",PinScreenController.pincodePinScreen,Geld);
+        } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
             e.printStackTrace();
+        }
+
+        int Response = Integer.parseInt(API.withdrawResponse);
+        System.out.println(Response);
+
+        if(Response == 200) {
+
+            SceneController controller = SceneController.getInstance();
+            try {
+                controller.setScene("ContinueScreen.fxml");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            displayBalance = displayBalance - Geld;
+        }
+        else {
+            System.out.println("HIER MOET NOG IETS");
         }
     }
 
@@ -117,7 +113,7 @@ public class WithdrawScreenController {
     protected void submitReturnAction(){
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("TransactionScreenEngels.fxml");
+            controller.setScene("TransactionScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }

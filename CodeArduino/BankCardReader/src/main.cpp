@@ -17,7 +17,6 @@
 #define RST_PIN         5           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
 // variables used for timer
-unsigned long previousMillis = 0;
 unsigned long activity = 0;         // not used rn
 unsigned long lastActivity = 0;     // not used rn
 // input variables
@@ -56,7 +55,7 @@ AccelStepper dispStepper2 = AccelStepper(motorInterfaceType, motorPin9, motorPin
 AccelStepper dispStepper3 = AccelStepper(motorInterfaceType, motorPin13, motorPin15, motorPin14, motorPin16);
 // creating the card
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
-byte block = 4;                     // determines the block that we will read from
+int block = 2;                     // determines the block that we will read from
 byte len = 18;                      // determines the length of the array
 int bytesToRead = 16;               // the amount of bytes to read
 byte trailerBlock = 7;              // sets the length of the trailer block
@@ -108,7 +107,7 @@ void setup() {
 // runs continuously to execute the program
 void loop() {
     unsigned long currentMillis = millis();
-
+    unsigned long previousMillis = currentMillis;
     // runs the eatingCard function 
     // dispense(1,2,3);
     // dispenserHome(); 
@@ -120,7 +119,7 @@ void loop() {
         ejectingCard();
     }
     // as long as checkCard is true it will try to read a card
-    if (checkCard) {
+    while (checkCard) {
         currentMillis = millis();
         // if it succesfully reads a card it will set checkCard to false, ending the while loop
         if (readCardDetails()) {
@@ -208,13 +207,14 @@ void processInputs(String input) {
 // reads the info on the card and sends it over the serial connection
 // returns true if succesful, false if not
 boolean readCardDetails() {
+    String outputString = "";
     mfrc522.PCD_Init(); // initiate the reader
     // if there is a new card and succesful read, execute the function
     if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) { 
     // Authenticate using key A
-    String outputString = "";
+    
     // tries to use the authentication key and other info to authenticate the card, if this fails it will send an error code
-    status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
+    status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, block, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) {
         Serial.println("CIerCard1");
         return false;
@@ -239,9 +239,8 @@ boolean readCardDetails() {
 
 void eatingCard() {
     // setting up a millis timer
-    boolean timeout = false;
-    unsigned long startTime = startTime;
-    unsigned long currentTime = millis();
+    unsigned long startTime = millis();
+    unsigned long currentTime = startTime;
     // reading the stop switch and checking the timeout
     // while they are both false it will keep running the stepper till either the timeout gets reached or the stopswitch activates
     while(digitalRead(stopSwitch)) {

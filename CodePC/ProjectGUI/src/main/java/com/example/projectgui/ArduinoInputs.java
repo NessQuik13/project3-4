@@ -11,7 +11,7 @@ public class ArduinoInputs extends Thread {
     public boolean KPnew = false;
 
     ArduinoInputs(SerialPort ap) {
-    this.arduinoPort = ap;
+        this.arduinoPort = ap;
     }
 
     public String getRecData() {
@@ -50,7 +50,7 @@ public class ArduinoInputs extends Thread {
     }
 
     public void run() {
-    Scanner scanner = new Scanner(arduinoPort.getInputStream());
+        Scanner scanner = new Scanner(arduinoPort.getInputStream());
         while (arduinoPort.isOpen()) {
             while (scanner.hasNextLine()) {
                 try {

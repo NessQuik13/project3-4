@@ -37,7 +37,7 @@ public class StartScreenController{
 //        }
 //        if (success) {
 //            try{
-//                controller.setScene("PinScreenEngels.fxml");
+//                controller.setScene("PinScreen.fxml");
 //            } catch (IOException e) {e.printStackTrace();}
 //        }
 //    }

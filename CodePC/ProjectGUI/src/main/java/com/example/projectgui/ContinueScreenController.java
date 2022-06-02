@@ -19,30 +19,10 @@ public class ContinueScreenController {
 
         Singleton language = Singleton.getInstance();
         if (language.getIsEnglish() == false) {
-            submitAbort.setText("Anuleren");
+            submitAbort.setText("Annuleren");
             submitFinish.setText("Transactie beeindigen");
             submitContinue.setText("Transactie voortzetten");
         }
-
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable(){
-
-
-                    @Override
-                    public void run() {
-                        SceneController controller = SceneController.getInstance();
-                        try {
-                            controller.setScene("StartScreen.fxml");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        },60000);
     }
 
     @FXML
@@ -51,7 +31,7 @@ public class ContinueScreenController {
     protected void submitContinueAction(){
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("TransactionScreenEngels.fxml");
+            controller.setScene("TransactionScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,7 +42,7 @@ public class ContinueScreenController {
     protected void submitFinishAction(){
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("ReceiptScreenEngels.fxml");
+            controller.setScene("ReceiptScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }

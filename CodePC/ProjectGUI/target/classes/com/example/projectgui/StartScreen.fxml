@@ -33,10 +33,13 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label alignment="CENTER" text="Insert your pas" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER" fx:id="T1">
+            <Label fx:id="T1" alignment="CENTER" text="Insert your card" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                <font>
                   <Font size="57.0" />
                </font>
+               <padding>
+                  <Insets left="-50.0" right="-50.0" />
+               </padding>
             </Label>
             <ImageView fitHeight="294.0" fitWidth="384.0" GridPane.columnIndex="2" GridPane.rowIndex="2">
                <image>

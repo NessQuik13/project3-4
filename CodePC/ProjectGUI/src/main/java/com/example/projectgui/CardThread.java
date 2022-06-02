@@ -16,8 +16,8 @@ public class CardThread implements Runnable{
             }});
             return;
         }
-        String temp = ArduinoControls.getCardInfo();
-        if (temp.startsWith("ER")) {
+        ;
+        if (!ArduinoControls.getCardInfo()) {
             Platform.runLater(() -> {try {
                 controller.setScene("LanguageScreen.fxml");
             } catch (IOException e) {
@@ -26,7 +26,7 @@ public class CardThread implements Runnable{
             return;
         }
         Platform.runLater(() -> {try {
-            controller.setScene("PinScreenEngels.fxml");
+            controller.setScene("PinScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }});

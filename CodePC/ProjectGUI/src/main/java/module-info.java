@@ -11,6 +11,8 @@ module com.example.projectgui {
     requires eu.hansolo.tilesfx;
     requires java.sql;
     requires com.fazecast.jSerialComm;
+    requires java.net.http;
+    requires json.simple;
 
     opens com.example.projectgui to javafx.fxml;
     exports com.example.projectgui;

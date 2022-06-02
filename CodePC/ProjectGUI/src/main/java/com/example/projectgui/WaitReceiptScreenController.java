@@ -31,7 +31,7 @@ public class WaitReceiptScreenController {
                     this.stop();
                     SceneController controller = SceneController.getInstance();
                     try {
-                        controller.setScene("FinishScreenEngels.fxml");
+                        controller.setScene("FinishScreen.fxml");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

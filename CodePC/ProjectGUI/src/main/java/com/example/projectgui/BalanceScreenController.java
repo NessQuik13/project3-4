@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class BalanceScreenController {
+public class BalanceScreenController extends API {
 
     private Timer timer;
 
@@ -22,55 +22,34 @@ public class BalanceScreenController {
     private Label T1;
 
     @FXML
-    private TableColumn Balance;
+    private Label Balance;
+
+    @FXML
+    private Label Money;
 
     @FXML
     private TableColumn Transaction;
 
     public void initialize() {
 
+        String balance;
+
         Singleton language = Singleton.getInstance();
         if (language.getIsEnglish() == false) {
             T1.setText("Balans");
-            submitAbort.setText("Anuleren");
+            submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
             submitContinue.setText("Doorgaan");
         }
 
-        final ObservableList<FileData> data = FXCollections.observableArrayList(
-                new FileData("test", "test"),
-                new FileData("test", "test")
-        );
+        if (language.getIsEnglish() == true) {
+            Balance.setText("You currently have");
+        } else {
+            Balance.setText("U bezit op dit moment");
+        }
 
-
-        Balance.setCellValueFactory(new PropertyValueFactory<>("balance"));
-        Transaction.setCellValueFactory(new PropertyValueFactory("transaction"));
-
-        ObservableList<String> list = FXCollections.observableArrayList();
-        table.setItems(data);
-        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        table.getColumns().addAll(Balance,Transaction);
-
-
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable() {
-
-
-                    @Override
-                    public void run() {
-                        SceneController controller = SceneController.getInstance();
-                        try {
-                            controller.setScene("StartScreen.fxml");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        }, 60000);
+        balance = "€ " + String.valueOf(displayBalance);
+        Money.setText(balance);
     }
 
     @FXML
@@ -80,7 +59,7 @@ public class BalanceScreenController {
     protected void submitReturnAction() {
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("TransactionScreenEngels.fxml");
+            controller.setScene("TransactionScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,7 +72,7 @@ public class BalanceScreenController {
     protected void submitContinueAction() {
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("ContinueScreenEngels.fxml");
+            controller.setScene("ContinueScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }

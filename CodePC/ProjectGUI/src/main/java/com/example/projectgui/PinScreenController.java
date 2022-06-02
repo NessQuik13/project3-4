@@ -5,29 +5,29 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.PrimitiveIterator;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class PinScreenController implements Runnable {
+public class PinScreenController  implements Runnable {
     private ArrayList<String> passwords = new ArrayList<>();
     private char[] wachtwoord;
-    private int Attempts = 3;
+    public static String pincodePinScreen;
+
+    @FXML
+    public PasswordField pinField;
+
 
     @FXML
     private Label T1;
 
     public void initialize() {
         Singleton language = Singleton.getInstance();
-        if (!language.getIsEnglish()) {
+        if (language.getIsEnglish() == false) {
             T1.setText("Pin invoeren");
-            submitAbort.setText("Anuleren");
+            submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
             submitPin.setText("Indienen");
         }
@@ -43,46 +43,67 @@ public class PinScreenController implements Runnable {
 
     @FXML
     protected void submitPinAction() {
-        Singleton language = Singleton.getInstance();
-        if (pinField.getText().equals("1234")) {
-            Attempts = 3;
+
+        pincodePinScreen = pinField.getText();
+
+        try {
+            API.balance(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber, pincodePinScreen);
+        } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        int Response = Integer.parseInt(API.balanceResponse);
+        System.out.println(Response);
+        int Attempts = API.loginAttemptsLeft;
+        System.out.println(Attempts);
+
+        Singleton language = new Singleton();
+
+        if (Response == 200) {
             SceneController controller = SceneController.getInstance();
             try {
-                controller.setScene("TransactionScreenEngels.fxml");
+                controller.setScene("TransactionScreen.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        else if(Attempts == 1){
-            if (!language.getIsEnglish()) {
+
+        else if(Attempts == 0){
+            if (language.getIsEnglish() == false) {
                 Warning.setText("Kaart uitwerpen.....");
+                pinField.setText("");
             }
             else {
                 //Eject card
                 Warning.setText("Ejecting card......");
+                pinField.setText("");
             }
-            pinField.setText("");
         }
         else {
-            Attempts = Attempts - 1;
             if (Attempts >= 2) {
-                if (!language.getIsEnglish()) {
+                if (language.getIsEnglish() == false) {
                     Warning.setText("Foute pin, " + Attempts + " pogingen over");
+                    pinField.setText("");
+                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempts left");
+                    pinField.setText("");
+                    initialize();
                 }
             }
             else {
-                if (!language.getIsEnglish()) {
+                if (language.getIsEnglish() == false) {
                     Warning.setText("Foute pin, " + Attempts + " poging over");
+                    pinField.setText("");
+                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempt left");
+                    pinField.setText("");
+                    initialize();
                 }
             }
-            pinField.setText("");
-            initialize();
         }
     }
 
@@ -113,28 +134,6 @@ public class PinScreenController implements Runnable {
         }
     }
 
-    @FXML
-    private PasswordField pinField;
-
-    public void connect() {
-        String url = "jdbc:mysql://145.24.222.137:3306/banklocal";
-        String username = "timo";
-        String password = "Welkom02!";
-
-        System.out.println("Connecting database...");
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-            System.out.println("Database connected!");
-
-            var result = connection.createStatement().executeQuery("SELECT * FROM pas ");
-
-            while (result.next()) {
-                passwords.add(result.getString("pincode"));
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException("Cannot connect the database!", e);
-        }
-    }
 
     @Override
     public void run() {
