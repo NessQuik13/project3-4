@@ -22,7 +22,7 @@ public class TransactionScreenController {
 
     public void initialize() {
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Kies een transactie");
             submitAbort.setText("Annuleren");
             submitBalance.setText("Balans");

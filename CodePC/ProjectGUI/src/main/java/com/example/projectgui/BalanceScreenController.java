@@ -35,14 +35,14 @@ public class BalanceScreenController extends API {
         String balance;
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Balans");
             submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
             submitContinue.setText("Doorgaan");
         }
 
-        if (language.getIsEnglish() == true) {
+        if (language.getIsEnglish()) {
             Balance.setText("You currently have");
         } else {
             Balance.setText("U bezit op dit moment");
@@ -84,6 +84,7 @@ public class BalanceScreenController extends API {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.ejectCard();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

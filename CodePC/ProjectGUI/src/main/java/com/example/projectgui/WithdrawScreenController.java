@@ -81,18 +81,14 @@ public class WithdrawScreenController extends API{
     private Button submitAmount;
     @FXML
     protected void submitAmountAction(){
-
         try {
-            API.withdraw("GR","KRIV","GRKRIV0000123401",PinScreenController.pincodePinScreen,Geld);
+            API.withdraw(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber,PinScreenController.pincodePinScreen,Geld);
         } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
             e.printStackTrace();
         }
-
         int Response = Integer.parseInt(API.withdrawResponse);
         System.out.println(Response);
-
         if(Response == 200) {
-
             SceneController controller = SceneController.getInstance();
             try {
                 controller.setScene("ContinueScreen.fxml");
@@ -105,8 +101,6 @@ public class WithdrawScreenController extends API{
             System.out.println("HIER MOET NOG IETS");
         }
     }
-
-
     @FXML
     private Button submitReturn;
     @FXML
@@ -123,6 +117,7 @@ public class WithdrawScreenController extends API{
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.ejectCard();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

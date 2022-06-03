@@ -13,6 +13,15 @@
 #include <MFRC522.h>
 #include <AccelStepper.h>
 #include <Keypad.h>
+#include "Adafruit_Thermal.h"
+#include <SoftwareSerial.h>
+
+#define TX_PIN 1 // Arduino transmit labeled RX on printer
+#define RX_PIN 0 // Arduino receive labeled TX on printer
+
+SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declare SoftwareSerial obj first
+Adafruit_Thermal printer(&mySerial);     // Pass addr to printer constructor
+
 
 #define RST_PIN         5           // Configurable, see typical pin layout above
 #define SS_PIN          53          // Configurable, see typical pin layout above
@@ -28,7 +37,7 @@ boolean eatCard = false;
 boolean ejectCard = false;
 // setting up stepper
 int distanceBills = 1000;
-#define stopSwitch 7
+#define stopSwitch 7      // switch in the card reader
 #define motorPin1  8      // IN1 on the ULN2003 driver
 #define motorPin2  9      // IN2 on the ULN2003 driver
 #define motorPin3  10     // IN3 on the ULN2003 driver
@@ -55,7 +64,7 @@ AccelStepper dispStepper2 = AccelStepper(motorInterfaceType, motorPin9, motorPin
 AccelStepper dispStepper3 = AccelStepper(motorInterfaceType, motorPin13, motorPin15, motorPin14, motorPin16);
 // creating the card
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
-int block = 2;                     // determines the block that we will read from
+int block = 2;                      // determines the block that we will read from
 byte len = 18;                      // determines the length of the array
 int bytesToRead = 16;               // the amount of bytes to read
 byte trailerBlock = 7;              // sets the length of the trailer block
@@ -82,12 +91,14 @@ void processInputs(String);
 void ejectingCard();
 void dispense(int, int, int);
 void dispenserHome();
+void receiptPrinter(String , String ,String);
 
 // setup runs once to initiate the program
 void setup() {
     Serial.begin(115200); // Initialize serial communications with the PC
     while (!Serial);    // Do nothing if no serial port is opened
     SPI.begin();        // Init SPI bus
+    printer.begin();
     mfrc522.PCD_Init(); // Init MFRC522 card    
     // Prepare the key (used both as key A and as key B)
     // using FFFFFFFFFFFFh which is the default at chip delivery from the factory
@@ -111,6 +122,8 @@ void loop() {
     // runs the eatingCard function 
     // dispense(1,2,3);
     // dispenserHome(); 
+    receiptPrinter("03/06/2022", "GRKRIV000123401", "699");
+    delay(10000);
     if (eatCard) {
         eatingCard();
     }
@@ -203,6 +216,9 @@ void processInputs(String input) {
         ejectCard = true;
         return;
     }
+    if (input.substring(0,6).equals("Cprint")) {
+        
+    }
 }
 // reads the info on the card and sends it over the serial connection
 // returns true if succesful, false if not
@@ -267,7 +283,7 @@ void ejectingCard() {
     Serial.println("RcardEjected");
     ejectCard = false;
 }
-// system might be changed, left in for now
+// moves the steppers to dispense the wanted amount of money
 void dispense(int ten, int twenty, int fifty) {
     // for 50 euro bills
     for(int i = 0; i < fifty; i++) {
@@ -283,7 +299,7 @@ void dispense(int ten, int twenty, int fifty) {
         dispStepper3.runToPosition();
     }
 }
-// same as above
+// moves the steppers back home after filling
 void dispenserHome() {
     dispStepper1.moveTo(0);
     dispStepper1.runToPosition();
@@ -291,4 +307,67 @@ void dispenserHome() {
     dispStepper2.runToPosition();
     dispStepper3.moveTo(0);
     dispStepper3.runToPosition();   
+}
+
+void receiptPrinter(String dateInput , String account, String amountPinned) {
+  printer.wake();
+  printer.setDefault();
+
+  printer.setSize('M');
+  printer.justify('C');
+  printer.boldOn();
+
+  printer.println(F("Kopie Kaarthouder"));
+  
+  printer.setLineHeight(50);
+  printer.setSize('L');
+  
+  printer.println(F("KR-IV"));
+
+  printer.setSize('S');
+  printer.setLineHeight(); //default
+  printer.boldOff();
+  printer.println(F("Wijnhaven 107"));
+  printer.println(F("3011 WN ROTTERDAM"));
+
+  printer.justify('L');
+  printer.setLineHeight(50);
+
+  printer.println(F("ATM: WHR01"));
+
+  printer.setLineHeight(); //default
+  
+  printer.println(F("Geldopname"));
+  printer.println(F("Kabinet Rutte IV"));
+  printer.println(F("Kaart: xxxxxxxxxx1234"));
+
+  printer.setSize('L');
+  printer.boldOn();
+  printer.setLineHeight(50);
+
+  printer.println(F("TRANSACTIE"));
+
+  printer.setSize('S');
+  printer.boldOff();
+  printer.setLineHeight(); //default
+
+  printer.println(dateInput);
+
+  printer.setLineHeight(50);
+  printer.setSize('M');
+  printer.boldOn();
+
+  printer.print(F("Totaal: "));
+  printer.print(amountPinned);
+  printer.print(F(" EUR\n"));
+
+  printer.justify('C');
+  printer.setSize('L');
+
+  printer.println(F("AKKOORD"));
+
+  printer.feed(2);
+
+  printer.sleep();
+  Serial.println("RreceiptPrinted");
 }

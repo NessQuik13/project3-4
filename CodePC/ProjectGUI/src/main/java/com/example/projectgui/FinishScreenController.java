@@ -20,21 +20,21 @@ public class FinishScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Dankuwel");
             T2.setText("Voor het gebruiken van onze ATM");
         }
+
 
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 Platform.runLater(new Runnable(){
-
-
                     @Override
                     public void run() {
                         SceneController controller = SceneController.getInstance();
+                        ArduinoControls.ejectCard();
                         try {
                             controller.setScene("LanguageScreen.fxml");
                         } catch (IOException e) {
@@ -44,5 +44,6 @@ public class FinishScreenController {
                 });
             }
         },8000);
+        Platform.runLater(ArduinoControls::ejectCard);
     }
 }

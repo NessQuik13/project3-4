@@ -26,20 +26,4 @@ public class StartScreenController{
         }
         arduino.start();
     }
-//    public void control(boolean success) {
-//        SceneController controller = SceneController.getInstance();
-//        if (!success) {
-//            try {
-//                controller.setScene("LanguageScreen.fxml");
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        if (success) {
-//            try{
-//                controller.setScene("PinScreen.fxml");
-//            } catch (IOException e) {e.printStackTrace();}
-//        }
-//    }
-
 }

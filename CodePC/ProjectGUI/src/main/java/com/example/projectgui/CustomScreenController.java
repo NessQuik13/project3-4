@@ -18,7 +18,7 @@ public class CustomScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Voer een aagpast bedrag in");
             submitAbort.setText("Anuleren");
             submitReturn.setText("Terug");

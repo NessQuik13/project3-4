@@ -42,7 +42,7 @@ public class ArduinoInputs extends Thread {
             }
             // inputs keypad
             if (recData.startsWith("KP")) {
-                KPinput = recData.charAt(3);
+                KPinput = recData.charAt(2);
                 KPnew = true;
                 recData = "";
             }

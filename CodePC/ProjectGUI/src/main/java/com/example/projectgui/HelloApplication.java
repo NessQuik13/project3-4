@@ -17,7 +17,9 @@ public class HelloApplication extends Application {
                     Image image = new Image(new File("insertcard.gif").toURI().toString());
                     ImageView imageview = new ImageView(image);
                     SceneController controller = SceneController.getInstance();
-                    ArduinoControls.setupCommunication();
+                    if (!ArduinoControls.setupCommunication()) {
+                        System.exit(1); // if setup fails, exit program
+                    }
                     controller.setStage(stage);
                     controller.setScene("LanguageScreen.fxml");
                     stage.setTitle("ATM");

@@ -18,7 +18,7 @@ public class ContinueScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             submitAbort.setText("Annuleren");
             submitFinish.setText("Transactie beeindigen");
             submitContinue.setText("Transactie voortzetten");

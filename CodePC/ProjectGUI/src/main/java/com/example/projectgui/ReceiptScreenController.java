@@ -18,7 +18,7 @@ public class ReceiptScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Wilt U een bon?");
             submitNo.setText("Nee");
             submitYes.setText("Ja");

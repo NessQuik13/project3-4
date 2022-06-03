@@ -12,9 +12,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class PinScreenController  implements Runnable {
-    private ArrayList<String> passwords = new ArrayList<>();
-    private char[] wachtwoord;
-    public static String pincodePinScreen;
+    public static String pincodePinScreen = "";
 
     @FXML
     public PasswordField pinField;
@@ -25,7 +23,7 @@ public class PinScreenController  implements Runnable {
 
     public void initialize() {
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Pin invoeren");
             submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
@@ -43,8 +41,6 @@ public class PinScreenController  implements Runnable {
 
     @FXML
     protected void submitPinAction() {
-
-        pincodePinScreen = pinField.getText();
 
         try {
             API.balance(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber, pincodePinScreen);
@@ -69,41 +65,34 @@ public class PinScreenController  implements Runnable {
         }
 
         else if(Attempts == 0){
-            if (language.getIsEnglish() == false) {
+            if (!language.getIsEnglish()) {
                 Warning.setText("Kaart uitwerpen.....");
-                pinField.setText("");
             }
             else {
                 //Eject card
                 Warning.setText("Ejecting card......");
-                pinField.setText("");
             }
+            pinField.setText("");
         }
         else {
             if (Attempts >= 2) {
-                if (language.getIsEnglish() == false) {
+                if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " pogingen over");
-                    pinField.setText("");
-                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempts left");
-                    pinField.setText("");
-                    initialize();
                 }
             }
             else {
-                if (language.getIsEnglish() == false) {
+                if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " poging over");
-                    pinField.setText("");
-                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempt left");
-                    pinField.setText("");
-                    initialize();
                 }
             }
+            pinField.setText("");
+            initialize();
         }
     }
 
@@ -127,17 +116,17 @@ public class PinScreenController  implements Runnable {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.ejectCard();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-
     @Override
     public void run() {
-        StringBuilder password = new StringBuilder();
+        String password = "";
+        String dots = "";
         boolean pinConfirm = false;
         Character keyInput;
         ArduinoControls.sendData("CgetKey\n");
@@ -146,19 +135,26 @@ public class PinScreenController  implements Runnable {
             keyInput = ArduinoControls.getKeypad();
             switch (keyInput) {
                 case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
-                    if (password.length() >= 4) {
-                        password.append(keyInput);
+                    if (password.length() < 4) {
+                        password = password.concat(String.valueOf(keyInput));
+                        dots = dots.concat(String.valueOf('*'));
+                        pinField.setText(dots);
                     }
                 }
                 case '*' -> { // removes last character
                     if (password.length() >= 1) {
-                        password = new StringBuilder(password.substring(0, password.length() - 1));
+                        password = password.substring(0, password.length() - 1);
+                        if (dots.length() >= 1) {
+                        dots = dots.substring(0, dots.length() - 1);
+                        pinField.setText(dots);
+                        }
                     }
                 }
                 case '#' -> pinConfirm = true; // confirm pin
                 // if any other character, ignore
                 default -> System.out.println("invalid character / input, ignored");
             }
+            System.out.println(password);
             try{
                 Thread.sleep(10);
             }
@@ -167,18 +163,7 @@ public class PinScreenController  implements Runnable {
             }
         }
         ArduinoControls.sendData("CstopKey\n");
-        final String ww = password.toString();
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                pinField.setText(ww);
+        pincodePinScreen= password.toString();
+        Platform.runLater(this::submitPinAction);
             }
-        });
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(pinField.getText());
-            }
-        });
-    }
 }

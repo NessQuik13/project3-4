@@ -19,7 +19,7 @@ public class WaitReceiptScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Even geduld");
             T2.setText("Terwijl wij U bon printen");
         }
