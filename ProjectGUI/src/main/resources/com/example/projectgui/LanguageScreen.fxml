@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.projectgui.LanguageScreenController">
+   <children>
+      <ImageView fitHeight="1080.0" fitWidth="1920.0" layoutX="1102.0" layoutY="363.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <image>
+            <Image url="@Images/kutte_met_rutte.jpg" />
+         </image>
+      </ImageView>
+      <GridPane layoutX="-24.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="-24.0" AnchorPane.rightAnchor="24.0" AnchorPane.topAnchor="0.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label alignment="CENTER" prefHeight="88.0" prefWidth="754.0" text="Choose a language" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+               <font>
+                  <Font size="60.0" />
+               </font>
+               <GridPane.margin>
+                  <Insets left="-500.0" right="-500.0" />
+               </GridPane.margin>
+            </Label>
+            <Button fx:id="submitEnglish" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#submitEnglishAction" prefHeight="223.0" prefWidth="386.0" style="-fx-background-color: linear-gradient(#035F85, #1385B4); -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-radius: 30; -fx-background-insets: 0; -fx-text-fill: white;" GridPane.columnIndex="3" GridPane.rowIndex="2">
+               <graphic>
+                  <ImageView fitHeight="201.0" fitWidth="366.0">
+                     <image>
+                        <Image url="@Images/englishrounded.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+            <Button
+                    fx:id="submitDutch" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#submitDutchAction" prefHeight="223.0" prefWidth="386.0" style="-fx-background-color: linear-gradient(#035F85, #1385B4); -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-radius: 30; -fx-background-insets: 0; -fx-text-fill: white;"  GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <graphic>
+                  <ImageView fitHeight="201.0" fitWidth="366.0">
+                     <image>
+                        <Image url="@Images/dutchrounded.jpg" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+            <Button fx:id="submitAbort" alignment="CENTER" mnemonicParsing="false" onAction="#submitAbortAction" prefHeight="50.0" prefWidth="100.0" text="Abort" visible="false" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="4" GridPane.valignment="TOP" />
+         </children>
+      </GridPane>
+   </children>
+</AnchorPane>
