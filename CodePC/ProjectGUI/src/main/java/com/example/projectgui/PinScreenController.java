@@ -6,10 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 public class PinScreenController  implements Runnable {
     public static String pincodePinScreen = "";
@@ -41,7 +39,6 @@ public class PinScreenController  implements Runnable {
 
     @FXML
     protected void submitPinAction() {
-
         try {
             API.balance(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber, pincodePinScreen);
         } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
@@ -123,6 +120,8 @@ public class PinScreenController  implements Runnable {
             e.printStackTrace();
         }
     }
+
+
     @Override
     public void run() {
         String password = "";
@@ -154,7 +153,7 @@ public class PinScreenController  implements Runnable {
                 // if any other character, ignore
                 default -> System.out.println("invalid character / input, ignored");
             }
-            System.out.println(password);
+
             try{
                 Thread.sleep(10);
             }

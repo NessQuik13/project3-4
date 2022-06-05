@@ -1,22 +1,12 @@
 package com.example.projectgui;
 
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
+
+
 
 public class BalanceScreenController extends API {
-
-    private Timer timer;
-
-    @FXML
-    private TableView table;
 
     @FXML
     private Label T1;
@@ -27,8 +17,8 @@ public class BalanceScreenController extends API {
     @FXML
     private Label Money;
 
-    @FXML
-    private TableColumn Transaction;
+    public BalanceScreenController() {
+    }
 
     public void initialize() {
 
@@ -48,7 +38,7 @@ public class BalanceScreenController extends API {
             Balance.setText("U bezit op dit moment");
         }
 
-        balance = "€ " + String.valueOf(displayBalance);
+        balance = "€ " + displayBalance;
         Money.setText(balance);
     }
 

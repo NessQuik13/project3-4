@@ -1,5 +1,7 @@
 package com.example.projectgui;
+
 import com.fazecast.jSerialComm.SerialPort;
+
 import java.nio.charset.StandardCharsets;
 
 public class ArduinoControls {
@@ -153,4 +155,5 @@ public class ArduinoControls {
         }
         System.out.println("All commands have been reset");
     }
+
 }

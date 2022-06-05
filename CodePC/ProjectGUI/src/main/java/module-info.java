@@ -5,10 +5,9 @@ module com.example.projectgui {
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
-    requires validatorfx;
+//    requires validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
     requires java.sql;
     requires com.fazecast.jSerialComm;
     requires java.net.http;

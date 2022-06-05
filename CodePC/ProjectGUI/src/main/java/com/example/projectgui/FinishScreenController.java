@@ -10,8 +10,6 @@ import java.util.TimerTask;
 
 public class FinishScreenController {
 
-    private Timer timer;
-
 
     @FXML
     private Label T1;
@@ -25,21 +23,17 @@ public class FinishScreenController {
             T2.setText("Voor het gebruiken van onze ATM");
         }
 
-
-        timer = new Timer();
+        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Platform.runLater(new Runnable(){
-                    @Override
-                    public void run() {
-                        SceneController controller = SceneController.getInstance();
-                        ArduinoControls.ejectCard();
-                        try {
-                            controller.setScene("LanguageScreen.fxml");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                Platform.runLater(() -> {
+                    SceneController controller = SceneController.getInstance();
+
+                    try {
+                        controller.setScene("LanguageScreen.fxml");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
             }

@@ -1,15 +1,10 @@
 package com.example.projectgui;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 public class WithdrawScreenController extends API{
 
@@ -18,11 +13,16 @@ public class WithdrawScreenController extends API{
     private Label T1;
 
     @FXML
+    private Label Limit;
+
+    @FXML
     private Label Amount;
 
-    private int Geld = 0;
+    protected static int Geld = 0;
 
     public void initialize(){
+
+        Geld = 0;
 
         Singleton language = Singleton.getInstance();
         if (!language.getIsEnglish()) {
@@ -31,6 +31,7 @@ public class WithdrawScreenController extends API{
             submitReturn.setText("Terug");
             submitReset.setText("Bedrag resetten");
             submitAmount.setText("Indienen");
+            submitBillType.setText("Biljet voorkeur");
         }
     }
 
@@ -75,32 +76,45 @@ public class WithdrawScreenController extends API{
     protected void submitResetAction(){
         Geld = 0;
         Amount.setText("€" + String.valueOf(Geld));
-    }
+        Limit.setText("");
+        }
+
 
     @FXML
     private Button submitAmount;
     @FXML
     protected void submitAmountAction(){
-        try {
-            API.withdraw(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber,PinScreenController.pincodePinScreen,Geld);
-        } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
-            e.printStackTrace();
-        }
-        int Response = Integer.parseInt(API.withdrawResponse);
-        System.out.println(Response);
-        if(Response == 200) {
+
+        if(Geld <= displayBalance) {
+
             SceneController controller = SceneController.getInstance();
             try {
-                controller.setScene("ContinueScreen.fxml");
+                controller.setScene("SubmitRequestScreen.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            displayBalance = displayBalance - Geld;
         }
         else {
-            System.out.println("HIER MOET NOG IETS");
+            Limit.setText("Amount exceeds limit");
+            Singleton language = Singleton.getInstance();
+            if (!language.getIsEnglish()) {
+             Limit.setText("Bedrag overschrijdt limiet");
+            }
         }
     }
+
+    @FXML
+    private Button submitBillType;
+    @FXML
+    protected void submitBillTypeAction(){
+        SceneController controller = SceneController.getInstance();
+        try {
+            controller.setScene("BillTypeScreen.fxml");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private Button submitReturn;
     @FXML

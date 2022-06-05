@@ -51,7 +51,8 @@
                   </ImageView>
                </graphic>
             </Button>
-            <Button fx:id="submitDutch" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#submitDutchAction" prefHeight="223.0" prefWidth="386.0" style="-fx-background-color: linear-gradient(#035F85, #1385B4); -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-radius: 30; -fx-background-insets: 0; -fx-text-fill: white;" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Button
+                    fx:id="submitDutch" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" mnemonicParsing="false" onAction="#submitDutchAction" prefHeight="223.0" prefWidth="386.0" style="-fx-background-color: linear-gradient(#035F85, #1385B4); -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 ); -fx-background-radius: 30; -fx-background-insets: 0; -fx-text-fill: white;"  GridPane.columnIndex="1" GridPane.rowIndex="2">
                <graphic>
                   <ImageView fitHeight="201.0" fitWidth="366.0">
                      <image>
