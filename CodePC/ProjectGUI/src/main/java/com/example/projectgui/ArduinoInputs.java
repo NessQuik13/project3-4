@@ -7,8 +7,8 @@ public class ArduinoInputs extends Thread {
     private SerialPort arduinoPort;
     private String recData;
     private String cardInfo = "";
-    private Character KPinput;
-    public boolean KPnew = false;
+    private String KPinput = "";
+
 
     ArduinoInputs(SerialPort ap) {
         this.arduinoPort = ap;
@@ -20,11 +20,10 @@ public class ArduinoInputs extends Thread {
     public String getCardInfo() {
         return this.cardInfo;
     }
-    public Character getKPinput() {
-        KPnew = false;
+    public String getKPinput() {
         return this.KPinput;
     }
-    public void resetKPinput() {this.KPinput = null;}
+    public void resetKPinput() {this.KPinput ="";}
     public void resetCardInfo() {this.cardInfo = "";}
 
     private void dataProcessing() {
@@ -42,8 +41,7 @@ public class ArduinoInputs extends Thread {
             }
             // inputs keypad
             if (recData.startsWith("KP")) {
-                KPinput = recData.charAt(2);
-                KPnew = true;
+                KPinput = KPinput.concat(recData.substring(2));
                 recData = "";
             }
         }

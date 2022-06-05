@@ -1,13 +1,11 @@
 package com.example.projectgui;
 
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-
 import java.io.IOException;
 import java.util.Timer;
-import java.util.TimerTask;
+
 
 public class ContinueScreenController {
     private Timer timer;
@@ -18,7 +16,7 @@ public class ContinueScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (!language.getIsEnglish()) {
+        if (language.getIsEnglish() == false) {
             submitAbort.setText("Annuleren");
             submitFinish.setText("Transactie beeindigen");
             submitContinue.setText("Transactie voortzetten");

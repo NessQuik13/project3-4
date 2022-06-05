@@ -6,13 +6,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import org.json.simple.parser.ParseException;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 public class PinScreenController  implements Runnable {
-    public static String pincodePinScreen = "";
+    public static String pincodePinScreen;
 
     @FXML
     public PasswordField pinField;
@@ -42,8 +40,10 @@ public class PinScreenController  implements Runnable {
     @FXML
     protected void submitPinAction() {
 
+        pincodePinScreen = pinField.getText();
+
         try {
-            API.balance(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber, pincodePinScreen);
+            API.balance("GR","KRIV","GRKRIV0000123401", pincodePinScreen);
         } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
             e.printStackTrace();
         }
@@ -116,54 +116,40 @@ public class PinScreenController  implements Runnable {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
-        ArduinoControls.ejectCard();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
     @Override
     public void run() {
-        String password = "";
-        String dots = "";
-        boolean pinConfirm = false;
-        Character keyInput;
+        ArduinoControls.setupCommunication();
+        ArduinoControls.inputs.resetKPinput();
+        String wachtwoord = "";
         ArduinoControls.sendData("CgetKey\n");
         System.out.println("get key pin");
-        while (!pinConfirm) {
-            keyInput = ArduinoControls.getKeypad();
-            switch (keyInput) {
-                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
-                    if (password.length() < 4) {
-                        password = password.concat(String.valueOf(keyInput));
-                        dots = dots.concat(String.valueOf('*'));
-                        pinField.setText(dots);
-                    }
-                }
-                case '*' -> { // removes last character
-                    if (password.length() >= 1) {
-                        password = password.substring(0, password.length() - 1);
-                        if (dots.length() >= 1) {
-                        dots = dots.substring(0, dots.length() - 1);
-                        pinField.setText(dots);
-                        }
-                    }
-                }
-                case '#' -> pinConfirm = true; // confirm pin
-                // if any other character, ignore
-                default -> System.out.println("invalid character / input, ignored");
+        while (wachtwoord.length() < 4) {
+            String keyInput = ArduinoControls.getKeypadInputs();
+            if(keyInput == ""){
             }
-            System.out.println(password);
+            else{
+                ArduinoControls.inputs.resetKPinput();
+                wachtwoord += keyInput;
+                final String ww = wachtwoord;
+                Platform.runLater(() -> pinField.setText(ww));
+            }
+
             try{
-                Thread.sleep(10);
+                Thread.sleep(1);
             }
             catch (Exception e){
                 e.printStackTrace();
             }
         }
-        ArduinoControls.sendData("CstopKey\n");
-        pincodePinScreen= password.toString();
-        Platform.runLater(this::submitPinAction);
-            }
+        Platform.runLater(() -> System.out.println(pinField.getText()));
+
+    }
 }

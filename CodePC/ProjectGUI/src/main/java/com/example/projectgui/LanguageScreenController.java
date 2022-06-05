@@ -16,7 +16,7 @@ public class LanguageScreenController{
         Singleton language = Singleton.getInstance();
         try {
             language.setEnglish(true);
-            controller.setScene("StartScreen.fxml");
+            controller.setScene("PinScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,7 +30,7 @@ public class LanguageScreenController{
         Singleton language = Singleton.getInstance();
         try {
             language.setEnglish(false);
-            controller.setScene("StartScreen.fxml");
+            controller.setScene("PinScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,7 +42,7 @@ public class LanguageScreenController{
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("LanguageScreen.fxml");
+            controller.setScene("StartScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
