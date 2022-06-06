@@ -1,15 +1,11 @@
 package com.example.projectgui;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class TransactionScreenController {
     private Timer timer;
@@ -71,6 +67,7 @@ public class TransactionScreenController {
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

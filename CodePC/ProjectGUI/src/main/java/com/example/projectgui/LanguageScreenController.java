@@ -41,6 +41,7 @@ public class LanguageScreenController{
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

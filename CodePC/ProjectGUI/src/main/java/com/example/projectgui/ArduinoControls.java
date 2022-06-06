@@ -39,7 +39,7 @@ public class ArduinoControls {
         // setting up the parameters for the serial connection
         arduinoPort.setComPortParameters(115200, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
         arduinoPort.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0,0);
-        // if the port successfully opens it will also start a new thread that scans the inputs. For more details check ArduinoInputs
+        // if the port successfully opens it will also start a new thread that scans the inputs. For more details check com.example.projectgui.ArduinoInputs
         if (arduinoPort.openPort()){
             try {Thread.sleep(4000);} catch (Exception e) {e.printStackTrace();} // delay letting the arduino reboot
             System.out.println("Port successfully opened");
@@ -126,7 +126,7 @@ public class ArduinoControls {
         return true;
     }
     // eject the pincard
-    static boolean ejectCard() {
+    static void ejectCard() {
         System.out.println("Ejecting card");
         sendData("CejectCard\n");
         while (!inputs.getRecData().equals("RcardEjected")) {
@@ -134,7 +134,6 @@ public class ArduinoControls {
                 Thread.sleep(100);
             } catch (InterruptedException e) {e.printStackTrace();}
         }
-        return true;
     }
     // test method for keypad
     static Character getKeypad() {
@@ -143,6 +142,31 @@ public class ArduinoControls {
             try{ Thread.sleep(10);} catch (InterruptedException e) {e.printStackTrace();}
         }
         return inputs.getKPinput();
+    }
+    //dispense bills
+    static void dispense(int b10, int b20, int b50) {
+        String sb10 = "";
+        String sb20 = "";
+        String sb50 = "";
+        if (b10 < 10) {
+            sb10 = "0" + b10;
+        } else {sb10 = String.valueOf(b10);}
+        if (b20 < 10) {
+            sb20 = "0" + b20;
+        } else {sb20 = String.valueOf(b20);}
+        if (b50 < 10) {
+            sb50 = "0" + b50;
+        } else {sb50 = String.valueOf(b50);}
+        sendData("Cdis" + sb10 + sb20 + sb50 +"\n");
+        while (!inputs.getDisConfirm()) {
+            try{
+                Thread.sleep(10);
+            }catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("money has been dispensed");
+        inputs.setDisConfirm(false);
     }
     // reset all commands
     static void reset() {
@@ -154,6 +178,10 @@ public class ArduinoControls {
             } catch (InterruptedException e) {e.printStackTrace();}
         }
         System.out.println("All commands have been reset");
+    }
+    static void abort() {
+        ArduinoControls.ejectCard();
+        ArduinoControls.reset();
     }
 
 }

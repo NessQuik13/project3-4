@@ -113,7 +113,7 @@ public class PinScreenController  implements Runnable {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
-        ArduinoControls.ejectCard();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {
@@ -164,5 +164,5 @@ public class PinScreenController  implements Runnable {
         ArduinoControls.sendData("CstopKey\n");
         pincodePinScreen= password.toString();
         Platform.runLater(this::submitPinAction);
-            }
+    }
 }

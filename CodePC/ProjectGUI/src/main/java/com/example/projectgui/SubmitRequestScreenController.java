@@ -1,5 +1,6 @@
 package com.example.projectgui;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -9,6 +10,19 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class SubmitRequestScreenController extends WithdrawScreenController {
+    private static int bills10Dispense = 0;
+    private static int bills20Dispense = 0;
+    private static int bills50Dispense = 0;
+
+    public static void setBills10Dispense(int bills10Dispense) {
+        SubmitRequestScreenController.bills10Dispense = bills10Dispense;
+    }
+    public static void setBills20Dispense(int bills20Dispense) {
+        SubmitRequestScreenController.bills20Dispense = bills20Dispense;
+    }
+    public static void setBills50Dispense(int bills50Dispense) {
+        SubmitRequestScreenController.bills50Dispense = bills50Dispense;
+    }
 
     @FXML
     private Label T1;
@@ -36,7 +50,6 @@ public class SubmitRequestScreenController extends WithdrawScreenController {
         } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
             e.printStackTrace();
         }
-
         int Response = Integer.parseInt(API.withdrawResponse);
         System.out.println(Response);
 
@@ -49,6 +62,8 @@ public class SubmitRequestScreenController extends WithdrawScreenController {
                 e.printStackTrace();
             }
             displayBalance = displayBalance - Geld;
+            Platform.runLater(() -> {ArduinoControls.dispense(bills10Dispense, bills20Dispense, bills50Dispense);
+                bills10Dispense = 0; bills20Dispense = 0; bills50Dispense = 0;});
         }
     }
 
@@ -69,6 +84,7 @@ public class SubmitRequestScreenController extends WithdrawScreenController {
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

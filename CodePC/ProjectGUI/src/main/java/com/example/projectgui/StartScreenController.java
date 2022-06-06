@@ -2,12 +2,11 @@ package com.example.projectgui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import java.util.Timer;
 
 
 public class StartScreenController{
     Runnable runnable = new CardThread();
-    Thread arduino = new Thread(runnable);
+    Thread card = new Thread(runnable);
     @FXML
     private Label T1;
 
@@ -16,6 +15,6 @@ public class StartScreenController{
         if (!language.getIsEnglish()) {
             T1.setText("Voer Uw pas in");
         }
-        arduino.start();
+        card.start();
     }
 }

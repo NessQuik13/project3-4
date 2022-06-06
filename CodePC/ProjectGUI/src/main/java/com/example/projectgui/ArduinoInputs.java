@@ -8,10 +8,19 @@ public class ArduinoInputs extends Thread {
     private String recData;
     private String cardInfo = "";
     private Character KPinput;
+    private Boolean disConfirm = false;
     public boolean KPnew = false;
 
     ArduinoInputs(SerialPort ap) {
         this.arduinoPort = ap;
+    }
+
+    public Boolean getDisConfirm() {
+        return disConfirm;
+    }
+
+    public void setDisConfirm(Boolean disConfirm) {
+        this.disConfirm = disConfirm;
     }
 
     public String getRecData() {
@@ -24,7 +33,6 @@ public class ArduinoInputs extends Thread {
         KPnew = false;
         return this.KPinput;
     }
-    public void resetKPinput() {this.KPinput = null;}
     public void resetCardInfo() {this.cardInfo = "";}
 
     private void dataProcessing() {
@@ -46,6 +54,14 @@ public class ArduinoInputs extends Thread {
                 KPnew = true;
                 recData = "";
             }
+            if (recData.startsWith("Rd")) {
+                if (recData.contains("dFail")) {
+                    disConfirm = false;
+                }
+                if (recData.contains("dTrue")) {
+                    disConfirm = true;
+                }
+            }
         }
     }
 
@@ -63,5 +79,7 @@ public class ArduinoInputs extends Thread {
         }
         scanner.close();
     }
+
+
 }
 

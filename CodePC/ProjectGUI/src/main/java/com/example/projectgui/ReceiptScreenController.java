@@ -1,13 +1,11 @@
 package com.example.projectgui;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 import java.io.IOException;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class ReceiptScreenController {
     private Timer timer;

@@ -1,6 +1,5 @@
 package com.example.projectgui;
 
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import java.io.IOException;
@@ -50,6 +49,7 @@ public class ContinueScreenController {
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

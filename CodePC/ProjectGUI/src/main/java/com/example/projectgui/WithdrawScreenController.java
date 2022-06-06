@@ -7,7 +7,29 @@ import java.io.IOException;
 
 
 public class WithdrawScreenController extends API{
+    protected static int current10 = 10;
+    protected static int current20 = 10;
+    protected static int current50 = 10;
 
+    public static int getCurrent10() {
+        return current10;
+    }
+    public static int getCurrent20() {
+        return current20;
+    }
+    public static int getCurrent50() {
+        return current50;
+    }
+
+    public static void setCurrent10(int current10) {
+        WithdrawScreenController.current10 = current10;
+    }
+    public static void setCurrent20(int current20) {
+        WithdrawScreenController.current20 = current20;
+    }
+    public static void setCurrent50(int current50) {
+        WithdrawScreenController.current50 = current50;
+    }
 
     @FXML
     private Label T1;
@@ -19,6 +41,10 @@ public class WithdrawScreenController extends API{
     private Label Amount;
 
     protected static int Geld = 0;
+
+    public static int getGeld() {
+        return Geld;
+    }
 
     public void initialize(){
 
@@ -40,52 +66,61 @@ public class WithdrawScreenController extends API{
     @FXML
     protected void submitTenAction(){
         Geld = Geld + 10;
-        Amount.setText("€" + String.valueOf(Geld));
+        Amount.setText("€" + Geld);
     }
     @FXML
     private Button submitTwenty;
     @FXML
     protected void submitTwentyAction(){
         Geld = Geld + 20;
-        Amount.setText("€" + String.valueOf(Geld));
+        Amount.setText("€" + Geld);
     }
     @FXML
     private Button submitFifty;
     @FXML
     protected void submitFiftyAction(){
         Geld = Geld + 50;
-        Amount.setText("€" + String.valueOf(Geld));
+        Amount.setText("€" + Geld);
     }
     @FXML
     private Button submitTwohundred;
     @FXML
     protected void submitTwohundredAction(){
         Geld = Geld + 200;
-        Amount.setText("€" + String.valueOf(Geld));
+        Amount.setText("€" + Geld);
     }
     @FXML
     private Button submitFivehundred;
     @FXML
     protected void submitFivehundredAction(){
         Geld = Geld + 500;
-        Amount.setText("€" + String.valueOf(Geld));
+        Amount.setText("€" + Geld);
     }
     @FXML
     private Button submitReset;
     @FXML
     protected void submitResetAction(){
         Geld = 0;
-        Amount.setText("€" + String.valueOf(Geld));
+        Amount.setText("€" + Geld);
         Limit.setText("");
         }
 
-
+    protected int currentlyLoaded() {
+        return current10 * 10 + current20 * 20 + current50 * 50;
+    }
     @FXML
     private Button submitAmount;
     @FXML
     protected void submitAmountAction(){
-
-        if(Geld <= displayBalance) {
+        if (Geld > currentlyLoaded()) {
+            Limit.setText("Amount exceeds current money avaible in atm: " + currentlyLoaded());
+            Singleton language = Singleton.getInstance();
+            if (!language.getIsEnglish()) {
+                Limit.setText("Bedrag is hoger dan de automaat kan leveren: " + currentlyLoaded());
+                return;
+            }
+        }
+        if (Geld <= displayBalance) {
 
             SceneController controller = SceneController.getInstance();
             try {
@@ -131,7 +166,7 @@ public class WithdrawScreenController extends API{
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
-        ArduinoControls.ejectCard();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

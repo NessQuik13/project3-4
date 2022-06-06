@@ -38,6 +38,6 @@ public class FinishScreenController {
                 });
             }
         },8000);
-        Platform.runLater(ArduinoControls::ejectCard);
+        Platform.runLater(ArduinoControls::abort);
     }
 }

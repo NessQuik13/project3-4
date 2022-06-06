@@ -74,7 +74,7 @@ public class BalanceScreenController extends API {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
-        ArduinoControls.ejectCard();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

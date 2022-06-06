@@ -15,7 +15,7 @@
 #include <Keypad.h>
 #include "Adafruit_Thermal.h"
 #include <SoftwareSerial.h>
-
+using namespace std;
 #define TX_PIN 1 // Arduino transmit labeled RX on printer
 #define RX_PIN 0 // Arduino receive labeled TX on printer
 
@@ -83,6 +83,11 @@ char keys[rowNum][columnNum] = {    // layout of the keypad
 byte pinRows[rowNum] = {23, 25, 27, 29}; 
 byte pinColumn[columnNum] = {22, 24, 26, 28};
 Keypad keypad = Keypad( makeKeymap(keys), pinRows, pinColumn, rowNum, columnNum); // setup of the keypad object
+// the amount of bills that need to be dispensed
+boolean dipsenseBills = false;
+int bills10 = 0;
+int bills20 = 0;
+int bills50 = 0;
 // all the functions used
 boolean readCardDetails();
 String keypadInputs();
@@ -120,7 +125,7 @@ void loop() {
     unsigned long currentMillis = millis();
     unsigned long previousMillis = currentMillis;
     // runs the eatingCard function 
-    // dispense(1,2,3);
+    dispense(bills10,bills20,bills50);
     // dispenserHome(); 
     receiptPrinter("03/06/2022", "GRKRIV000123401", "699");
     delay(10000);
@@ -169,7 +174,9 @@ void serialEvent(){
 // processes the input string by reading it and comparing it to know inputs
 // if it finds one that fits it will execute that response
 void processInputs(String input) {
-    if (input.equals("")) { return;}
+    if (input.equals("")) { 
+        return;
+        }
     if (input.equals("ping")) {
         Serial.println("pong"); 
         return;
@@ -216,7 +223,20 @@ void processInputs(String input) {
         ejectCard = true;
         return;
     }
-    if (input.substring(0,6).equals("Cprint")) {
+    if (input.startsWith("Cdis")) { // test version
+        String b10 = input.substring(4,5);
+        bills10 = b10.toInt();
+        Serial.println(bills10);
+        String b20 = input.substring(6,7);
+        bills20 = b20.toInt();
+        Serial.println(bills20);
+        String b50 = input.substring(8,9);
+        bills50 = b50.toInt();
+        Serial.println(bills50);
+        dipsenseBills = true;
+        return;
+    }
+    if (input.startsWith("Cprint")) {
         
     }
 }
@@ -298,6 +318,10 @@ void dispense(int ten, int twenty, int fifty) {
         dispStepper3.moveTo(dispStepper3.currentPosition() - distanceBills);
         dispStepper3.runToPosition();
     }
+    bills10 = 0;
+    bills20 = 0;
+    bills50 = 0;
+    dipsenseBills = false;
 }
 // moves the steppers back home after filling
 void dispenserHome() {

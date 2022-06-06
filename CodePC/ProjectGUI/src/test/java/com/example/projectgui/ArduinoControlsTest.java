@@ -1,18 +1,18 @@
 package com.example.projectgui;
 
-import com.fazecast.jSerialComm.SerialPort;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ArduinoControlsTest {
     // tests that the port is actually open and that it is connected to the port with arduino
     // connect arduino with the bank code beforehand
     @BeforeEach
-    public static void setUp() {
+    public void setUp() {
         // Most of the arduinoControl functions need a connection to the arduino so we make sure that a connection is established
         if (ArduinoControls.arduinoPort == null) {
             ArduinoControls.setupCommunication();
@@ -23,7 +23,7 @@ class ArduinoControlsTest {
         }
     }
     @AfterEach
-    public static void cleanUp () {
+    public void cleanUp () {
         // to make sure none of the values of the previous tests get used in the next test we close the connection
         // every time the arduino makes a new connection it resets itself. (confirm this)
         if (ArduinoControls.arduinoPort.isOpen()) {
@@ -40,8 +40,8 @@ class ArduinoControlsTest {
     // disconnect arduino first
 //    @Test
 //    void analyzeSetupCommunicationFail() throws Exception{
-//        Assertions.assertFalse(ArduinoControls.setupCommunication() &&
-//                ArduinoControls.arduinoPort.isOpen());
+//        Assertions.assertFalse(com.example.projectgui.com.example.projectgui.ArduinoControls.setupCommunication() &&
+//                com.example.projectgui.com.example.projectgui.ArduinoControls.arduinoPort.isOpen());
 //    }
     @Test
     void analyzeSetupPortStatus() throws Exception {
