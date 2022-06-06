@@ -29,20 +29,12 @@ class ArduinoControlsTest {
         if (ArduinoControls.arduinoPort.isOpen()) {
             ArduinoControls.arduinoPort.closePort();
         }
-
+        ArduinoControls.reset();
     }
-
     @Test
     void analyzeSetupSucces() throws Exception{
         Assertions.assertTrue(ArduinoControls.setupCommunication());
     }
-    // tests that the port is not actually opened if the setup fails
-    // disconnect arduino first
-//    @Test
-//    void analyzeSetupCommunicationFail() throws Exception{
-//        Assertions.assertFalse(com.example.projectgui.com.example.projectgui.ArduinoControls.setupCommunication() &&
-//                com.example.projectgui.com.example.projectgui.ArduinoControls.arduinoPort.isOpen());
-//    }
     @Test
     void analyzeSetupPortStatus() throws Exception {
         Assertions.assertTrue(ArduinoControls.arduinoPort.isOpen());
@@ -80,6 +72,7 @@ class ArduinoControlsTest {
     }
     @Test
     void getCardInfo() {
+        Assertions.assertTrue(ArduinoControls.getCardInfo());
     }
 
     @Test
