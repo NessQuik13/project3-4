@@ -29,7 +29,7 @@ class ArduinoControlsTest {
         if (ArduinoControls.arduinoPort.isOpen()) {
             ArduinoControls.arduinoPort.closePort();
         }
-        ArduinoControls.reset();
+        //ArduinoControls.reset();
     }
     @Test
     void analyzeSetupSucces() throws Exception{

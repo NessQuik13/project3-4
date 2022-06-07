@@ -16,8 +16,8 @@
 #include "Adafruit_Thermal.h"
 #include <SoftwareSerial.h>
 using namespace std;
-#define TX_PIN 1 // Arduino transmit labeled RX on printer
-#define RX_PIN 0 // Arduino receive labeled TX on printer
+#define TX_PIN 0 // Arduino transmit labeled RX on printer
+#define RX_PIN 1 // Arduino receive labeled TX on printer
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declare SoftwareSerial obj first
 Adafruit_Thermal printer(&mySerial);     // Pass addr to printer constructor
@@ -35,6 +35,7 @@ boolean checkCard = false;
 boolean getKeyInput = false;
 boolean eatCard = false;
 boolean ejectCard = false;
+boolean dipsenseBills = false;
 // setting up stepper
 int distanceBills = 1000;
 #define stopSwitch 7      // switch in the card reader
@@ -84,7 +85,7 @@ byte pinRows[rowNum] = {23, 25, 27, 29};
 byte pinColumn[columnNum] = {22, 24, 26, 28};
 Keypad keypad = Keypad( makeKeymap(keys), pinRows, pinColumn, rowNum, columnNum); // setup of the keypad object
 // the amount of bills that need to be dispensed
-boolean dipsenseBills = false;
+
 int bills10 = 0;
 int bills20 = 0;
 int bills50 = 0;
@@ -114,19 +115,23 @@ void setup() {
     stepper.setMaxSpeed(1000);          // set max speed
     stepper.setAcceleration(500.0);      // set accel
     dispStepper1.setMaxSpeed(1000);          // set max speed
-    dispStepper1.setAcceleration(500.0);      // set accel
+    dispStepper1.setAcceleration(5000.0);      // set accel
     dispStepper2.setMaxSpeed(1000);          // set max speed
-    dispStepper2.setAcceleration(500.0);      // set accel
+    dispStepper2.setAcceleration(5000.0);      // set accel
     dispStepper3.setMaxSpeed(1000);          // set max speed
-    dispStepper3.setAcceleration(500.0);      // set accel
+    dispStepper3.setAcceleration(5000.0);      // set accel
 }
 // runs continuously to execute the program
 void loop() {
     unsigned long currentMillis = millis();
     unsigned long previousMillis = currentMillis;
     // runs the eatingCard function 
-    dispense(bills10,bills20,bills50);
-    // dispenserHome(); 
+    // for(int i = 0; i < 10; i++) {
+    // dispStepper1.moveTo(dispStepper1.currentPosition() + 450);
+    //     dispStepper1.runToPosition();
+    //     delay(1000);
+    // }
+    // dispenserHome();
     receiptPrinter("03/06/2022", "GRKRIV000123401", "699");
     delay(10000);
     if (eatCard) {
@@ -190,6 +195,7 @@ void processInputs(String input) {
         getKeyInput = false;
         eatCard = false;
         ejectCard = false;
+        dipsenseBills = false;
         Serial.println("Rresetting");
         return;
         // add future functions
@@ -306,18 +312,14 @@ void ejectingCard() {
 // moves the steppers to dispense the wanted amount of money
 void dispense(int ten, int twenty, int fifty) {
     // for 50 euro bills
-    for(int i = 0; i < fifty; i++) {
-        dispStepper1.moveTo(dispStepper1.currentPosition() - distanceBills);
+        dispStepper1.moveTo(dispStepper1.currentPosition() + (distanceBills * fifty));
         dispStepper1.runToPosition();
-    }
-    for(int i = 0;i < twenty; i++) {
-        dispStepper2.moveTo(dispStepper2.currentPosition() + distanceBills);
+    
+        dispStepper2.moveTo(dispStepper2.currentPosition() + (distanceBills * twenty));
         dispStepper2.runToPosition();
-    }
-    for(int i = 0;i < ten; i++) {
-        dispStepper3.moveTo(dispStepper3.currentPosition() - distanceBills);
+    
+        dispStepper3.moveTo(dispStepper3.currentPosition() - (distanceBills * ten));
         dispStepper3.runToPosition();
-    }
     bills10 = 0;
     bills20 = 0;
     bills50 = 0;

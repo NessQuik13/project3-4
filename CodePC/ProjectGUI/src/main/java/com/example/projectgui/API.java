@@ -21,152 +21,189 @@ public class API {
     public static int loginAttemptsLeft;
     public static long displayBalance;
     public static String withdrawResponse;
+        //    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, ParseException {
+//        //balance("GR","KRIV","GRKRIV0000123401", 1234);
+//        balance("T1","NERD","RUNERD0000432100", 4321);
+//        //withdraw("GR","KRIV","GRKRIV0000123401",1234, 100);
+//        //withdraw("GR","KRIV","GRKRIV0000123401",1234, 100);
+//        //test();
+//    }
+        static public void test(){
+            JSONObject headDetails= new JSONObject();
+            headDetails.put("fromCtry","GR");
+            headDetails.put("fromBank","KRIV");
+            headDetails.put("toCtry", "RU");
+            headDetails.put("toBank", "NERD");
 
-    static public int balance(String toCtry, String toBank, String acctNo, String pin) throws URISyntaxException, IOException, InterruptedException, ParseException {
-        //make json with parameters
-        JSONObject headDetails = new JSONObject();
-        headDetails.put("fromCtry","GR");
-        headDetails.put("fromBank","KRIV");
-        headDetails.put("toCtry", toCtry);
-        headDetails.put("toBank", toBank);
+            JSONObject json_file = new JSONObject();
+            json_file.put("head",headDetails);
 
-        JSONObject headJSON = new JSONObject();
-        headJSON.put("head",headDetails);
+            JSONObject bodyDetails = new JSONObject();
+            bodyDetails.put("acctNo", "RUNERD0000432100");
+            bodyDetails.put("pin", "4321");
 
-        JSONObject bodyDetails = new JSONObject();
-        bodyDetails.put("acctNo", acctNo);
-        bodyDetails.put("pin", pin);
+            json_file.put("body",bodyDetails);
 
-        JSONObject bodyJson = new JSONObject();
-        bodyJson.put("body",bodyDetails);
+            System.out.println(json_file);
+        }
 
-        JSONArray message = new JSONArray();
+        static public int balance(String toCtry, String toBank, String acctNo, String pin) throws URISyntaxException, IOException, InterruptedException, ParseException {
+            //make json with parameters
 
-        message.add(headJSON);
-        message.add(bodyJson);
+//        JSONObject headDetails = new JSONObject();
+//        headDetails.put("fromCtry","GR");
+//        headDetails.put("fromBank","KRIV");
+//        headDetails.put("toCtry", toCtry);
+//        headDetails.put("toBank", toBank);
+//
+//        JSONObject headJSON = new JSONObject();
+//        headJSON.put("head",headDetails);
+//
+//        JSONObject bodyDetails = new JSONObject();
+//        bodyDetails.put("acctNo", acctNo);
+//        bodyDetails.put("pin", pin);
+//
+//        JSONObject bodyJson = new JSONObject();
+//        bodyJson.put("body",bodyDetails);
+//
+//        JSONArray message = new JSONArray();
+//
+//        message.add(headJSON);
+//        message.add(bodyJson);
 
-        System.out.println(message.toString());
+            JSONObject headDetails= new JSONObject();
+            headDetails.put("fromCtry","GR");
+            headDetails.put("fromBank","KRIV");
+            headDetails.put("toCtry", toCtry);
+            headDetails.put("toBank", toBank);
 
-        //send json to 145.24.222.137:8443/balance
-        var uri = new URI("http://145.24.222.137:8443/balance");
+            JSONObject json_file = new JSONObject();
+            json_file.put("head",headDetails);
 
-        var client = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(uri).POST(BodyPublishers.ofString(message.toString()))
-                .header("Content-type", "application/json").build();
-        var response = client.send(request, BodyHandlers.ofString());
+            JSONObject bodyDetails = new JSONObject();
+            bodyDetails.put("acctNo", acctNo);
+            bodyDetails.put("pin", pin);
 
-        System.out.println(response.body());
-        int status = response.statusCode();
-        System.out.println("Statuscode: " + status);
+            json_file.put("body",bodyDetails);
 
-         switch(status){
-         case 200: //Success, returns balance
-             //read balance from JSON
-             JSONParser parser = new JSONParser();
-             JSONObject responseJSON = (JSONObject) parser.parse(response.body());
-             System.out.println(responseJSON);
-             balanceResponse = String.valueOf(status);
+            System.out.println(json_file);
 
-             JSONObject temp = new JSONObject();
-             temp = (JSONObject)responseJSON.get("body");
+            System.out.println(json_file.toString());
 
-             var balance = temp.get("balance");
-             System.out.println("Balance: " + balance);
-             long temp1 = (long)balance;
-             int returnBalance = (int)temp1;
-             displayBalance = (long)balance;
+            //send json to 145.24.222.137:8443/balance
+            var uri = new URI("http://145.24.222.137:8443/balance");
+            //var uri = new URI("http://145.24.222.139:8443/balance");
+            //var uri = new URI("http://127.0.0.1:5000/balance");
 
-             System.out.println(returnBalance);
-             return returnBalance;
-         case 401: //Incorrect pin, returns attempts left
-             JSONParser parser1 = new JSONParser();
-             JSONObject responseJSON1 = (JSONObject) parser1.parse(response.body());
-             System.out.println(responseJSON1);
-             balanceResponse = String.valueOf(status);
+            var client = HttpClient.newHttpClient();
+            var request = HttpRequest.newBuilder(uri).POST(BodyPublishers.ofString(json_file.toJSONString()))
+                    .header("Content-type", "application/json").build();
+            var response = client.send(request, BodyHandlers.ofString());
 
-             JSONObject temp2 = new JSONObject();
-             temp2 = (JSONObject)responseJSON1.get("body");
+            System.out.println(response.body());
 
-             long attemptsLeft = (long) temp2.get("attemptsLeft");
-             System.out.println("Attempts left: " + attemptsLeft);
-             int returnAttemptsLeft = (int)attemptsLeft;
-             loginAttemptsLeft = (int)attemptsLeft;
-             System.out.println(returnAttemptsLeft);
-             return returnAttemptsLeft;
-         default:
-             return status;
-         }
-    }
+            int status = response.statusCode();
+            System.out.println("Statuscode: " + status);
+            balanceResponse = String.valueOf(status);
+            switch(status){
+                case 200: //Success, returns balance
+                    //read balance from JSON
+                    JSONParser parser = new JSONParser();
+                    JSONObject responseJSON = (JSONObject) parser.parse(response.body());
+                    System.out.println(responseJSON);
 
-    static public int withdraw(String toCtry, String toBank, String acctNo, String pin, int amount) throws URISyntaxException, IOException, InterruptedException, ParseException {
-        //make json with parameters
-        JSONObject headDetails = new JSONObject();
-        headDetails.put("fromCtry", "GR");
-        headDetails.put("fromBank", "KRIV");
-        headDetails.put("toCtry", toCtry);
-        headDetails.put("toBank", toBank);
+                    JSONObject temp = new JSONObject();
+                    temp = (JSONObject)responseJSON.get("body");
 
-        JSONObject headJSON = new JSONObject();
-        headJSON.put("head", headDetails);
+                    var balance = temp.get("balance");
+                    System.out.println("Balance: " + balance);
+                    long temp1 = (long)balance;
+                    int returnBalance = (int)temp1;
+                    displayBalance = (long)balance;
 
-        JSONObject bodyDetails = new JSONObject();
-        bodyDetails.put("acctNo", acctNo);
-        bodyDetails.put("pin", pin);
-        bodyDetails.put("amount", amount);
+                    System.out.println(returnBalance);
+                    return returnBalance;
+                case 401: //Incorrect pin, returns attempts left
+                    JSONParser parser1 = new JSONParser();
+                    JSONObject responseJSON1 = (JSONObject) parser1.parse(response.body());
+                    System.out.println(responseJSON1);
 
-        JSONObject bodyJson = new JSONObject();
-        bodyJson.put("body", bodyDetails);
+                    JSONObject temp2 = new JSONObject();
+                    temp2 = (JSONObject)responseJSON1.get("body");
 
-        JSONArray message = new JSONArray();
+                    long attemptsLeft = (long) temp2.get("attemptsLeft");
+                    System.out.println("Attempts left: " + attemptsLeft);
+                    int returnAttemptsLeft = (int)attemptsLeft;
+                    loginAttemptsLeft = (int)attemptsLeft;
+                    System.out.println(returnAttemptsLeft);
+                    return returnAttemptsLeft;
+                default:
+                    return status;
+            }
+        }
 
-        message.add(headJSON);
-        message.add(bodyJson);
+        static public int withdraw(String toCtry, String toBank, String acctNo, String pin, int amount) throws URISyntaxException, IOException, InterruptedException, ParseException {
+            //make json with parameters
+            JSONObject headDetails= new JSONObject();
+            headDetails.put("fromCtry","GR");
+            headDetails.put("fromBank","KRIV");
+            headDetails.put("toCtry", toCtry);
+            headDetails.put("toBank", toBank);
 
-        System.out.println(message.toString());
+            JSONObject json_file = new JSONObject();
+            json_file.put("head",headDetails);
 
-        //send json to 145.24.222.137:8443/withdraw
-        var uri = new URI("http://145.24.222.137:8443/withdraw");
+            JSONObject bodyDetails = new JSONObject();
+            bodyDetails.put("acctNo", acctNo);
+            bodyDetails.put("pin", pin);
+            bodyDetails.put("amount", amount);
 
-        var client = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(uri).POST(BodyPublishers.ofString(message.toString()))
-                .header("Content-type", "application/json").build();
-        var response = client.send(request, BodyHandlers.ofString());
+            json_file.put("body",bodyDetails);
 
-        System.out.println(response.body());
-        int status = response.statusCode();
-        System.out.println("Statuscode: " + status);
+            //send json to 145.24.222.137:8443/withdraw
+            var uri = new URI("http://145.24.222.137:8443/withdraw");
+            //var uri = new URI("http://127.0.0.1:5000/withdraw");
 
-        switch (status) {
-            case 200: //Success, returns balance after transaction
-                JSONParser parser = new JSONParser();
-                JSONObject responseJSON = (JSONObject) parser.parse(response.body());
-                System.out.println(responseJSON);
-                withdrawResponse = String.valueOf(status);
+            var client = HttpClient.newHttpClient();
+            var request = HttpRequest.newBuilder(uri).POST(BodyPublishers.ofString(json_file.toJSONString()))
+                    .header("Content-type", "application/json").build();
+            var response = client.send(request, BodyHandlers.ofString());
 
-                JSONObject temp = new JSONObject();
-                temp = (JSONObject) responseJSON.get("body");
+            System.out.println(response.body());
+            int status = response.statusCode();
+            System.out.println("Statuscode: " + status);
+            withdrawResponse = String.valueOf(status);
 
-                long balance = (long) temp.get("balance");
-                System.out.println("Balance: " + balance);
-                int returnBalance = (int) balance;
-                System.out.println(returnBalance);
-                return returnBalance;
-            case 401: //Incorrect pin, return attempts left
-                JSONParser parser1 = new JSONParser();
-                JSONObject responseJSON1 = (JSONObject) parser1.parse(response.body());
-                System.out.println(responseJSON1);
-                withdrawResponse = String.valueOf(status);
+            switch (status) {
+                case 200: //Success, returns balance after transaction
+                    JSONParser parser = new JSONParser();
+                    JSONObject responseJSON = (JSONObject) parser.parse(response.body());
+                    System.out.println(responseJSON);
 
-                JSONObject temp2 = new JSONObject();
-                temp2 = (JSONObject) responseJSON1.get("body");
 
-                long attemptsLeft = (long) temp2.get("attemptsLeft");
-                System.out.println("Attempts left: " + attemptsLeft);
-                int returnAttemptsLeft = (int)attemptsLeft;
-                System.out.println(returnAttemptsLeft);
-                return returnAttemptsLeft;
-            default:
-                return status;
+                    JSONObject temp = new JSONObject();
+                    temp = (JSONObject) responseJSON.get("body");
+
+                    long balance = (long) temp.get("balance");
+                    System.out.println("Balance: " + balance);
+                    int returnBalance = (int) balance;
+                    System.out.println(returnBalance);
+                    return returnBalance;
+                case 401: //Incorrect pin, return attempts left
+                    JSONParser parser1 = new JSONParser();
+                    JSONObject responseJSON1 = (JSONObject) parser1.parse(response.body());
+                    System.out.println(responseJSON1);
+
+                    JSONObject temp2 = new JSONObject();
+                    temp2 = (JSONObject) responseJSON1.get("body");
+
+                    long attemptsLeft = (long) temp2.get("attemptsLeft");
+                    System.out.println("Attempts left: " + attemptsLeft);
+                    int returnAttemptsLeft = (int)attemptsLeft;
+                    System.out.println(returnAttemptsLeft);
+                    return returnAttemptsLeft;
+                default:
+                    return status;
+            }
         }
     }
-}

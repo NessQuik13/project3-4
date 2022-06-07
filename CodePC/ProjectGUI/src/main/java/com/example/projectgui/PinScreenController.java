@@ -70,6 +70,7 @@ public class PinScreenController  implements Runnable {
                 Warning.setText("Ejecting card......");
             }
             pinField.setText("");
+            ArduinoControls.ejectCard();
         }
         else {
             if (Attempts >= 2) {
@@ -138,6 +139,7 @@ public class PinScreenController  implements Runnable {
                         password = password.concat(String.valueOf(keyInput));
                         dots = dots.concat(String.valueOf('*'));
                         pinField.setText(dots);
+                        System.out.println(password);
                     }
                 }
                 case '*' -> { // removes last character
@@ -162,7 +164,7 @@ public class PinScreenController  implements Runnable {
             }
         }
         ArduinoControls.sendData("CstopKey\n");
-        pincodePinScreen= password.toString();
+        pincodePinScreen= password;
         Platform.runLater(this::submitPinAction);
     }
 }
