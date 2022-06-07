@@ -55,9 +55,6 @@ public class ArduinoInputs extends Thread {
                 recData = "";
             }
             if (recData.startsWith("Rd")) {
-                if (recData.contains("dFail")) {
-                    disConfirm = false;
-                }
                 if (recData.contains("dTrue")) {
                     disConfirm = true;
                 }

@@ -7,29 +7,7 @@ import java.io.IOException;
 
 
 public class WithdrawScreenController extends API{
-    protected static int current10 = 10;
-    protected static int current20 = 10;
-    protected static int current50 = 10;
 
-    public static int getCurrent10() {
-        return current10;
-    }
-    public static int getCurrent20() {
-        return current20;
-    }
-    public static int getCurrent50() {
-        return current50;
-    }
-
-    public static void setCurrent10(int current10) {
-        WithdrawScreenController.current10 = current10;
-    }
-    public static void setCurrent20(int current20) {
-        WithdrawScreenController.current20 = current20;
-    }
-    public static void setCurrent50(int current50) {
-        WithdrawScreenController.current50 = current50;
-    }
 
     @FXML
     private Label T1;
@@ -106,7 +84,7 @@ public class WithdrawScreenController extends API{
         }
 
     protected int currentlyLoaded() {
-        return current10 * 10 + current20 * 20 + current50 * 50;
+        return ((10 - ArduinoControls.getDispensed10()) * 10) + ((10 - ArduinoControls.getDispensed20()) * 20) + ((10 - ArduinoControls.getDispensed50()) * 50);
     }
     @FXML
     private Button submitAmount;
@@ -117,11 +95,11 @@ public class WithdrawScreenController extends API{
             Singleton language = Singleton.getInstance();
             if (!language.getIsEnglish()) {
                 Limit.setText("Bedrag is hoger dan de automaat kan leveren: " + currentlyLoaded());
-                return;
+
             }
+            return;
         }
         if (Geld <= displayBalance) {
-
             SceneController controller = SceneController.getInstance();
             try {
                 controller.setScene("SubmitRequestScreen.fxml");

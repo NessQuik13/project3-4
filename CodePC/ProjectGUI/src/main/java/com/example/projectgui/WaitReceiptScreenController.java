@@ -9,6 +9,8 @@ import java.io.IOException;
 
 public class WaitReceiptScreenController {
     private AnimationTimer progressTimer;
+    PrinterThread print = new PrinterThread();
+    Thread printThread = new Thread(print);
     @FXML
     private ProgressBar progressBar;
 
@@ -23,11 +25,13 @@ public class WaitReceiptScreenController {
             T1.setText("Even geduld");
             T2.setText("Terwijl wij U bon printen");
         }
+        printThread.start();
+
         progressTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
                 double currentProgress =  progressBar.getProgress();
-                if(currentProgress + 0.0005f > 1.0f){
+                if(currentProgress + 0.0010f > 1.0f){
                     this.stop();
                     SceneController controller = SceneController.getInstance();
                     try {
@@ -43,5 +47,6 @@ public class WaitReceiptScreenController {
             }
         };
         progressTimer.start();
+
     }
 }

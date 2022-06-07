@@ -94,14 +94,14 @@ public class BillTypeScreenController {
             e.printStackTrace();
         }
     }
-    private int calculateBills(int preference) {
+    public static int calculateBills(int preference) {
         int money = WithdrawScreenController.getGeld();
         int bills10 = 0;
         int bills20 = 0;
         int bills50 = 0;
-        int curBills10 = WithdrawScreenController.getCurrent10();
-        int curBills20 = WithdrawScreenController.getCurrent20();
-        int curBills50 = WithdrawScreenController.getCurrent50();
+        int curBills10 = 10 - ArduinoControls.getDispensed10();
+        int curBills20 = 10 - ArduinoControls.getDispensed20();
+        int curBills50 = 10 - ArduinoControls.getDispensed50();
         switch (preference) {
             case 10:
                 while (money >= 10  && bills10 < 10 && curBills10 > bills10) {
@@ -161,12 +161,9 @@ public class BillTypeScreenController {
                     return 1;
                 }
         }
-        SubmitRequestScreenController.setBills10Dispense(bills10);
-        SubmitRequestScreenController.setBills20Dispense(bills20);
-        SubmitRequestScreenController.setBills50Dispense(bills50);
-        WithdrawScreenController.setCurrent10(curBills10 - bills10);
-        WithdrawScreenController.setCurrent20(curBills20 - bills20);
-        WithdrawScreenController.setCurrent50(curBills50 - bills50);
+        SubmitRequestScreenController.setBills10Dispense(bills10 + ArduinoControls.getDispensed10());
+        SubmitRequestScreenController.setBills20Dispense(bills20 + ArduinoControls.getDispensed20());
+        SubmitRequestScreenController.setBills50Dispense(bills50 + ArduinoControls.getDispensed50());
         return 0;
     }
 }

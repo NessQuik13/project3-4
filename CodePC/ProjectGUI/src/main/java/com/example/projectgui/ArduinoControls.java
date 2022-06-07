@@ -1,8 +1,9 @@
 package com.example.projectgui;
 
 import com.fazecast.jSerialComm.SerialPort;
-
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 public class ArduinoControls {
     static SerialPort[] ports;                  // list of all ports found
@@ -12,6 +13,29 @@ public class ArduinoControls {
     static String accCountry;
     static String accBank;
     static String accNumber;
+    protected static int dispensed10 = 0;
+    protected static int dispensed20 = 0;
+    protected static int dispensed50 = 0;
+
+    public static int getDispensed10() {
+        return dispensed10;
+    }
+    public static int getDispensed20() {
+        return dispensed20;
+    }
+    public static int getDispensed50() {
+        return dispensed50;
+    }
+
+    public static void setDispensed10(int dispensed10) {
+        ArduinoControls.dispensed10 = dispensed10;
+    }
+    public static void setDispensed20(int dispensed20) {
+        ArduinoControls.dispensed20 = dispensed20;
+    }
+    public static void setDispensed50(int dispensed50) {
+        ArduinoControls.dispensed50 = dispensed50;
+    }
 
     // setting up communication by looking at all the ports and picking the one that has the right name.
     // after that it tries to set it up, if this succeeds there will be a thread that listens to arduino inputs.
@@ -145,6 +169,7 @@ public class ArduinoControls {
     }
     //dispense bills
     static void dispense(int b10, int b20, int b50) {
+        System.out.println("Dispensing bills");
         String sb10 = "";
         String sb20 = "";
         String sb50 = "";
@@ -166,6 +191,9 @@ public class ArduinoControls {
             }
         }
         System.out.println("money has been dispensed");
+        dispensed10 = b10;
+        dispensed20 = b20;
+        dispensed50 = b50;
         inputs.setDisConfirm(false);
     }
     // reset all commands
@@ -178,6 +206,13 @@ public class ArduinoControls {
             } catch (InterruptedException e) {e.printStackTrace();}
         }
         System.out.println("All commands have been reset");
+    }
+    static void printReceipt() {
+        System.out.println("Printing receipt");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss dd/MM/yyyy");
+        LocalDateTime now = LocalDateTime.now();
+        String time = dtf.format(now);
+        sendData("Cprint" + time + ArduinoControls.accNumber + SubmitRequestScreenController.getReceiptAmount() +"\n");
     }
     static void abort() {
         ArduinoControls.ejectCard();

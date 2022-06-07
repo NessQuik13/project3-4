@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import org.json.simple.parser.ParseException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
 
 public class PinScreenController  implements Runnable {
