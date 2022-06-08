@@ -18,7 +18,7 @@ public class CustomScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Voer een aagpast bedrag in");
             submitAbort.setText("Anuleren");
             submitReturn.setText("Terug");
@@ -72,6 +72,7 @@ public class CustomScreenController {
     @FXML
     protected void submitAbortAction(){
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

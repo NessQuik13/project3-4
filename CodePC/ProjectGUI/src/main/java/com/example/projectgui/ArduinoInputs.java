@@ -7,10 +7,20 @@ public class ArduinoInputs extends Thread {
     private SerialPort arduinoPort;
     private String recData;
     private String cardInfo = "";
-    private String KPinput = "";
+    private Character KPinput;
+    private Boolean disConfirm = false;
+    public boolean KPnew = false;
 
     ArduinoInputs(SerialPort ap) {
-    this.arduinoPort = ap;
+        this.arduinoPort = ap;
+    }
+
+    public Boolean getDisConfirm() {
+        return disConfirm;
+    }
+
+    public void setDisConfirm(Boolean disConfirm) {
+        this.disConfirm = disConfirm;
     }
 
     public String getRecData() {
@@ -19,10 +29,10 @@ public class ArduinoInputs extends Thread {
     public String getCardInfo() {
         return this.cardInfo;
     }
-    public String getKPinput() {
+    public Character getKPinput() {
+        KPnew = false;
         return this.KPinput;
     }
-    public void resetKPinput() {this.KPinput ="";}
     public void resetCardInfo() {this.cardInfo = "";}
 
     private void dataProcessing() {
@@ -40,14 +50,20 @@ public class ArduinoInputs extends Thread {
             }
             // inputs keypad
             if (recData.startsWith("KP")) {
-                KPinput = KPinput.concat(recData.substring(2));
+                KPinput = recData.charAt(2);
+                KPnew = true;
                 recData = "";
+            }
+            if (recData.startsWith("Rd")) {
+                if (recData.contains("dTrue")) {
+                    disConfirm = true;
+                }
             }
         }
     }
 
     public void run() {
-    Scanner scanner = new Scanner(arduinoPort.getInputStream());
+        Scanner scanner = new Scanner(arduinoPort.getInputStream());
         while (arduinoPort.isOpen()) {
             while (scanner.hasNextLine()) {
                 try {
@@ -60,5 +76,7 @@ public class ArduinoInputs extends Thread {
         }
         scanner.close();
     }
+
+
 }
 

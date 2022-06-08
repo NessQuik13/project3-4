@@ -5,20 +5,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-
+import org.json.simple.parser.ParseException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.PrimitiveIterator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.net.ConnectException;
+import java.net.URISyntaxException;
 
-public class PinScreenController implements Runnable {
-    private ArrayList<String> passwords = new ArrayList<>();
-    private char[] wachtwoord;
-    private int Attempts = 3;
+public class PinScreenController  implements Runnable {
+    public static String pincodePinScreen = "";
+
+    @FXML
+    public PasswordField pinField;
+
 
     @FXML
     private Label T1;
@@ -27,7 +24,7 @@ public class PinScreenController implements Runnable {
         Singleton language = Singleton.getInstance();
         if (!language.getIsEnglish()) {
             T1.setText("Pin invoeren");
-            submitAbort.setText("Anuleren");
+            submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
             submitPin.setText("Indienen");
         }
@@ -43,54 +40,58 @@ public class PinScreenController implements Runnable {
 
     @FXML
     protected void submitPinAction() {
-        Singleton language = Singleton.getInstance();
+        try {
+            API.balance(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber, pincodePinScreen);
+        } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
+            e.printStackTrace();
+        }
 
-        if (pinField.getText().equals("1234")) {
-            Attempts = 3;
+        int Response = Integer.parseInt(API.balanceResponse);
+        System.out.println(Response);
+        int Attempts = API.loginAttemptsLeft;
+        System.out.println(Attempts);
+
+        Singleton language = new Singleton();
+
+        if (Response == 200) {
             SceneController controller = SceneController.getInstance();
             try {
-                controller.setScene("TransactionScreenEngels.fxml");
+                controller.setScene("TransactionScreen.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        else if(Attempts == 1){
+
+        else if(Attempts == 0){
             if (!language.getIsEnglish()) {
                 Warning.setText("Kaart uitwerpen.....");
-                pinField.setText("");
             }
             else {
                 //Eject card
                 Warning.setText("Ejecting card......");
-                pinField.setText("");
             }
+            pinField.setText("");
+            ArduinoControls.ejectCard();
         }
         else {
-            Attempts = Attempts - 1;
             if (Attempts >= 2) {
                 if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " pogingen over");
-                    pinField.setText("");
-                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempts left");
-                    pinField.setText("");
-                    initialize();
                 }
             }
             else {
                 if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " poging over");
-                    pinField.setText("");
-                    initialize();
                 }
                 else {
                     Warning.setText("Wrong pin, " + Attempts + " attempt left");
-                    pinField.setText("");
-                    initialize();
                 }
             }
+            pinField.setText("");
+            initialize();
         }
     }
 
@@ -114,6 +115,7 @@ public class PinScreenController implements Runnable {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {
@@ -121,81 +123,49 @@ public class PinScreenController implements Runnable {
         }
     }
 
-    @FXML
-    private PasswordField pinField;
-
-    public void connect() {
-        String url = "jdbc:mysql://145.24.222.137:3306/banklocal";
-        String username = "timo";
-        String password = "Welkom02!";
-
-        System.out.println("Connecting database...");
-
-        try (Connection connection = DriverManager.getConnection(url, username, password)) {
-            System.out.println("Database connected!");
-
-            var result = connection.createStatement().executeQuery("SELECT * FROM pas ");
-
-            while (result.next()) {
-                passwords.add(result.getString("pincode"));
-            }
-        } catch (SQLException e) {
-            throw new IllegalStateException("Cannot connect the database!", e);
-        }
-    }
 
     @Override
     public void run() {
-        ArduinoControls.setupCommunication();
-        ArduinoControls.inputs.resetKPinput();
-        String wachtwoord = "";
+        String password = "";
+        String dots = "";
+        boolean pinConfirm = false;
+        Character keyInput;
         ArduinoControls.sendData("CgetKey\n");
         System.out.println("get key pin");
-        while (wachtwoord.length() < 4) {
-            String keyInput = ArduinoControls.getKeypadInputs();
-            if(keyInput == ""){
-            }
-            else{
-                ArduinoControls.inputs.resetKPinput();
-                wachtwoord += keyInput;
-                final String ww = wachtwoord;
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        pinField.setText(ww);
+        while (!pinConfirm) {
+            keyInput = ArduinoControls.getKeypad();
+            switch (keyInput) {
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+                    if (password.length() < 4) {
+                        password = password.concat(String.valueOf(keyInput));
+                        dots = dots.concat(String.valueOf('*'));
+                        pinField.setText(dots);
+                        System.out.println(password);
                     }
-                });
+                }
+                case '*' -> { // removes last character
+                    if (password.length() >= 1) {
+                        password = password.substring(0, password.length() - 1);
+                        if (dots.length() >= 1) {
+                        dots = dots.substring(0, dots.length() - 1);
+                        pinField.setText(dots);
+                        }
+                    }
+                }
+                case '#' -> pinConfirm = true; // confirm pin
+                // if any other character, ignore
+                default -> System.out.println("invalid character / input, ignored");
             }
 
             try{
-                Thread.sleep(1);
+                Thread.sleep(10);
             }
             catch (Exception e){
                 e.printStackTrace();
             }
         }
         ArduinoControls.sendData("CstopKey\n");
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(pinField.getText());
-            }
-        });
-
-
-//        if (wachtwoord.equals("1234")) {
-//            Platform.runLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    SceneController controller = SceneController.getInstance();
-//                    try {
-//                        controller.setScene("TransactionScreenEngels.fxml");
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            });
-//        }
-
+        pincodePinScreen= password;
+        Platform.runLater(this::submitPinAction);
     }
 }

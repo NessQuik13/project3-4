@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import java.io.IOException;
 
 public class CardThread implements Runnable{
+    // eats the card till it hits the switch, checks it, if it reads a proper card it goes to the pinscreen
     public void run() {
         SceneController controller = SceneController.getInstance();
         System.out.println("Thread started");
@@ -16,8 +17,8 @@ public class CardThread implements Runnable{
             }});
             return;
         }
-        String temp = ArduinoControls.getCardInfo();
-        if (temp.startsWith("ER")) {
+        ;
+        if (!ArduinoControls.getCardInfo()) {
             Platform.runLater(() -> {try {
                 controller.setScene("LanguageScreen.fxml");
             } catch (IOException e) {
@@ -26,7 +27,7 @@ public class CardThread implements Runnable{
             return;
         }
         Platform.runLater(() -> {try {
-            controller.setScene("PinScreenEngels.fxml");
+            controller.setScene("PinScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }});

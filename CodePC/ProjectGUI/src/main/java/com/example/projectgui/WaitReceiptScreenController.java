@@ -8,7 +8,8 @@ import javafx.scene.control.ProgressBar;
 import java.io.IOException;
 
 public class WaitReceiptScreenController {
-    private AnimationTimer progressTimer;
+    PrinterThread print = new PrinterThread();
+    Thread printThread = new Thread(print);
     @FXML
     private ProgressBar progressBar;
 
@@ -19,29 +20,31 @@ public class WaitReceiptScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Even geduld");
             T2.setText("Terwijl wij U bon printen");
         }
-        progressTimer = new AnimationTimer() {
+        printThread.start();
+
+        AnimationTimer progressTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                double currentProgress =  progressBar.getProgress();
-                if(currentProgress + 0.0005f > 1.0f){
+                double currentProgress = progressBar.getProgress();
+                if (currentProgress + 0.0005f > 1.0f) {
                     this.stop();
                     SceneController controller = SceneController.getInstance();
                     try {
-                        controller.setScene("FinishScreenEngels.fxml");
+                        controller.setScene("FinishScreen.fxml");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-                else {
-                    currentProgress += 0.005 ;
+                } else {
+                    currentProgress += 0.0005;
                 }
                 progressBar.setProgress(currentProgress);
             }
         };
         progressTimer.start();
+
     }
 }

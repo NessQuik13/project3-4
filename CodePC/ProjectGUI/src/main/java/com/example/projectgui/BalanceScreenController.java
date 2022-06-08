@@ -1,76 +1,45 @@
 package com.example.projectgui;
 
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class BalanceScreenController {
 
-    private Timer timer;
 
-    @FXML
-    private TableView table;
+public class BalanceScreenController extends API {
 
     @FXML
     private Label T1;
 
     @FXML
-    private TableColumn Balance;
+    private Label Balance;
 
     @FXML
-    private TableColumn Transaction;
+    private Label Money;
+
+    public BalanceScreenController() {
+    }
 
     public void initialize() {
 
+        String balance;
+
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Balans");
-            submitAbort.setText("Anuleren");
+            submitAbort.setText("Annuleren");
             submitReturn.setText("Terug");
             submitContinue.setText("Doorgaan");
         }
 
-        final ObservableList<FileData> data = FXCollections.observableArrayList(
-                new FileData("test", "test"),
-                new FileData("test", "test")
-        );
+        if (language.getIsEnglish()) {
+            Balance.setText("You currently have");
+        } else {
+            Balance.setText("U bezit op dit moment");
+        }
 
-
-        Balance.setCellValueFactory(new PropertyValueFactory<>("balance"));
-        Transaction.setCellValueFactory(new PropertyValueFactory("transaction"));
-
-        ObservableList<String> list = FXCollections.observableArrayList();
-        table.setItems(data);
-        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        table.getColumns().addAll(Balance,Transaction);
-
-
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(new Runnable() {
-
-
-                    @Override
-                    public void run() {
-                        SceneController controller = SceneController.getInstance();
-                        try {
-                            controller.setScene("StartScreen.fxml");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            }
-        }, 60000);
+        balance = "€ " + displayBalance;
+        Money.setText(balance);
     }
 
     @FXML
@@ -80,7 +49,7 @@ public class BalanceScreenController {
     protected void submitReturnAction() {
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("TransactionScreenEngels.fxml");
+            controller.setScene("TransactionScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,7 +62,7 @@ public class BalanceScreenController {
     protected void submitContinueAction() {
         SceneController controller = SceneController.getInstance();
         try {
-            controller.setScene("ContinueScreenEngels.fxml");
+            controller.setScene("ContinueScreen.fxml");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,6 +74,7 @@ public class BalanceScreenController {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
+        ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
         } catch (IOException e) {

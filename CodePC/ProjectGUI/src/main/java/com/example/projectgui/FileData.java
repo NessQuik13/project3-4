@@ -1,6 +1,6 @@
 package com.example.projectgui;
 
-    import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleStringProperty;
     public class FileData {
         SimpleStringProperty balance;
         SimpleStringProperty transaction;

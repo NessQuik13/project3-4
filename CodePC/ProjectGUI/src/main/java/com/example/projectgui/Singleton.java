@@ -13,6 +13,8 @@ public final class Singleton {
         return INSTANCE;
     }
 
+
+
     public boolean getIsEnglish() { return isEnglish;}
 
     public void setEnglish(boolean b) {

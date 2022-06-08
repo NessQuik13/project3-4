@@ -9,10 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class FinishScreenController {
-
-    private Timer timer;
-
-
     @FXML
     private Label T1;
     @FXML
@@ -20,26 +16,31 @@ public class FinishScreenController {
     public void initialize(){
 
         Singleton language = Singleton.getInstance();
-        if (language.getIsEnglish() == false) {
+        if (!language.getIsEnglish()) {
             T1.setText("Dankuwel");
             T2.setText("Voor het gebruiken van onze ATM");
         }
 
-        timer = new Timer();
+        Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Platform.runLater(new Runnable(){
-
-
-                    @Override
-                    public void run() {
-                        SceneController controller = SceneController.getInstance();
+                Platform.runLater(() -> {
+                    SceneController controller = SceneController.getInstance();
+                    if (ArduinoControls.getDispensed50() == 10 || ArduinoControls.getDispensed20() == 10 || ArduinoControls.getDispensed10() == 10) {
                         try {
-                            controller.setScene("LanguageScreen.fxml");
-                        } catch (IOException e) {
+                            System.out.println("empty restock");
+                            controller.setScene("RestockScreen.fxml");
+                        }catch (IOException e) {
                             e.printStackTrace();
                         }
+                        return;
+                    }
+
+                    try {
+                        controller.setScene("LanguageScreen.fxml");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
             }

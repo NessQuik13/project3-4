@@ -39,8 +39,8 @@
 #define SS_PIN          10          // Configurable, see typical pin layout above
 #define motorInterface  8
 //  variables used for timer
-unsigned long currentMillis = 0;
-unsigned long previousMillis = 0;
+// unsigned long currentMillis = 0;
+// unsigned long previousMillis = 0;
 unsigned long activity = 0;
 unsigned long lastActivity = 0;
 
