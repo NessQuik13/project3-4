@@ -44,6 +44,7 @@ public class FinishScreenController {
                     }
                 });
             }
-        },8000);
+        },5000);
+        ArduinoControls.ejectCard();
     }
 }
