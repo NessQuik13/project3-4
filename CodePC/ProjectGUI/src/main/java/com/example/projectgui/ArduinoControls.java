@@ -95,8 +95,6 @@ public class ArduinoControls {
             arduinoPort.closePort();
             return false;
         }
-        // shuts down the port when the program is closed, so it prevents the port getting stuck
-        //Runtime.getRuntime().addShutdownHook(new Thread(() -> arduinoPort.closePort()));
         return true;
     }
     // sends data

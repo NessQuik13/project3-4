@@ -49,28 +49,6 @@ public class API {
         }
 
         static public int balance(String toCtry, String toBank, String acctNo, String pin) throws URISyntaxException, IOException, InterruptedException, ParseException {
-            //make json with parameters
-
-//        JSONObject headDetails = new JSONObject();
-//        headDetails.put("fromCtry","GR");
-//        headDetails.put("fromBank","KRIV");
-//        headDetails.put("toCtry", toCtry);
-//        headDetails.put("toBank", toBank);
-//
-//        JSONObject headJSON = new JSONObject();
-//        headJSON.put("head",headDetails);
-//
-//        JSONObject bodyDetails = new JSONObject();
-//        bodyDetails.put("acctNo", acctNo);
-//        bodyDetails.put("pin", pin);
-//
-//        JSONObject bodyJson = new JSONObject();
-//        bodyJson.put("body",bodyDetails);
-//
-//        JSONArray message = new JSONArray();
-//
-//        message.add(headJSON);
-//        message.add(bodyJson);
 
             JSONObject headDetails= new JSONObject();
             headDetails.put("fromCtry","GR");

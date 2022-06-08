@@ -96,6 +96,7 @@ public class BillTypeScreenController {
             e.printStackTrace();
         }
     }
+    // calculates the bills to dispense
     public static int calculateBills(int preference) {
         int money = WithdrawScreenController.getGeld();
         int bills10 = 0;

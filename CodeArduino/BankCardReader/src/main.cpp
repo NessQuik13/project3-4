@@ -132,38 +132,27 @@ void setup() {
     dispStepper2.setAcceleration(5000.0);      // set accel
     dispStepper3.setMaxSpeed(1000);          // set max speed
     dispStepper3.setAcceleration(500.0);      // set accel
-    // dispStepper1.moveTo(3900); // step 1: 750 step 2: 1100 step3: 1500 step 4: 1800 step 5: 2200 step 6:2450 step 7: 2800 step 8: 3100 step9: 3400 step 10: 3800
-    // //processInputs("Cdis010203");
-    //     dispStepper1.runToPosition();
-    // //     delay(1000);
-    // dispenserHome();
 }
 // runs continuously to execute the program
 void loop() {
     unsigned long currentMillis = millis();
     unsigned long previousMillis = currentMillis;
-    // runs the eatingCard function 
-    // for(int i = 0; i < 10; i++) {
-    // dispStepper1.moveTo(dispStepper1.currentPosition() + 450);
-    //     
-    //     delay(1000);
-    // }
-    // dispenserHome();
     while (refillStatus) {
         if (!digitalRead(refillButton)) {
             Serial.println("Rrefilled");
             refillStatus = false;
         }
     }
-    
+    // if print is true it will print a receipt
     if (print) {
         receiptPrinter(printTime, printAccount, printAmount);
         print = false;
     }
+    // if eatCard is true it will eat the card
     if (eatCard) {
         eatingCard();
     }
-    // eject card
+    // if ejectCard is true it will eject the card
     if (ejectCard) {
         ejectingCard();
     }
@@ -174,6 +163,7 @@ void loop() {
         if (readCardDetails()) {
             checkCard = false;
         }
+        // timeout 
         if (currentMillis - previousMillis >= 3500) {
             previousMillis = currentMillis;
             Serial.println("CItimeout");
@@ -187,6 +177,7 @@ void loop() {
             Serial.println("KP" + (String)key);
         }
     }
+    // if dispenesBill is true it will dispense the set bills
     if (dipsenseBills) {
         dispense(bills10, bills20, bills50);
     }
@@ -208,57 +199,60 @@ void serialEvent(){
 // processes the input string by reading it and comparing it to know inputs
 // if it finds one that fits it will execute that response
 void processInputs(String input) {
-    if (input.equals("")) { 
+    if (input.equals("")) { // empty string does nothing
         return;
         }
-    if (input.equals("ping")) {
+    if (input.equals("ping")) { // pong
         Serial.println("pong"); 
         return;
     }
-    if (input.equals("AuthoriseArduino")) {
+    if (input.equals("AuthoriseArduino")) { // authorisation check
         Serial.println("RMega2560Ready");
         return;
     }
-    if (input.equals("Creset")) {
+    if (input.equals("Creset")) { // resets the state of all possible functions
+        stringComplete = false;
+        inputString = "";
         checkCard = false;
         getKeyInput = false;
         eatCard = false;
         ejectCard = false;
         dipsenseBills = false;
+        print = false;
+        refillStatus = false;
         Serial.println("Rresetting");
         return;
-        // add future functions
     }
-    if (input.equals("CcardInfo")) {
+    if (input.equals("CcardInfo")) { // enables the checkCard 
         Serial.println("RgetCI");
         checkCard = true;
         return;
     }
-    if (input.equals("CcardStop")) {
+    if (input.equals("CcardStop")) { // disables the checkCard
         Serial.println("RstopCI");
         checkCard = false;
         return;
     }
-    if (input.equals("CgetKey")) {
+    if (input.equals("CgetKey")) { // enables the get keypad input
         Serial.println("RgetKey");
         getKeyInput = true;
         return;
     }
-    if (input.equals("CstopKey")) {
+    if (input.equals("CstopKey")) { // disables getting the keypad inputs
         Serial.println("RstopKey");
         getKeyInput = false;
         return;
     }
-    if (input.equals("CeatCard")) {
+    if (input.equals("CeatCard")) { // enables eatCard
         Serial.println("ReatingCard");
         eatCard = true;
         return;
     }
-    if (input.equals("CejectCard")) {
+    if (input.equals("CejectCard")) { // enables ejectCard
         ejectCard = true;
         return;
     }
-    if (input.startsWith("Cdis")) { // test version
+    if (input.startsWith("Cdis")) { // convert the input to bills to dispense
         Serial.println("R" + input);
         String b10 = input.substring(4,6);
         bills10 = b10.toInt();
@@ -269,7 +263,7 @@ void processInputs(String input) {
         dipsenseBills = true;
         return;
     }
-    if (input.startsWith("Cprint")) {
+    if (input.startsWith("Cprint")) { // converts in the input to printable text
         Serial.println("R" + input);
         printTime = input.substring(6,25);
         printAccount = input.substring(26, 42);
@@ -347,23 +341,25 @@ void ejectingCard() {
 }
 // moves the steppers to dispense the wanted amount of money
 void dispense(int ten, int twenty, int fifty) {
-    // for 50 euro bills
-        dispStepper1.moveTo(stepper1Steps[ten]);
-        dispStepper1.runToPosition();
+    // uses the stepper steps arrays to determine what distance to move
+    dispStepper1.moveTo(stepper1Steps[ten]);
+    dispStepper1.runToPosition();
     
-        dispStepper2.moveTo(stepper2Steps[twenty]);
-        dispStepper2.runToPosition();
+    dispStepper2.moveTo(stepper2Steps[twenty]);
+    dispStepper2.runToPosition();
     
-        dispStepper3.moveTo(stepper3Steps[fifty]);
-        dispStepper3.runToPosition();
-        dispenserHome();
+    dispStepper3.moveTo(stepper3Steps[fifty]);
+    dispStepper3.runToPosition();
+    // homes the steppers 
+    dispenserHome();
+    // resets the bills 
     bills10 = 0;
     bills20 = 0;
     bills50 = 0;
     Serial.println("RdTrue");
     dipsenseBills = false;
 }
-// moves the steppers back home after filling
+// moves the steppers back home
 void dispenserHome() {
     dispStepper1.moveTo(-50);
     dispStepper1.runToPosition();
@@ -378,7 +374,7 @@ void dispenserHome() {
     delay(1000);
     dispStepper3.setCurrentPosition(0);
 }
-
+// prints the receipt
 void receiptPrinter(String dateInput , String account, String amountPinned) {
     String acc = account.substring(9,15);
     printer.wake();

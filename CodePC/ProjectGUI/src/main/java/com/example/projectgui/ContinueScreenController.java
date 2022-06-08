@@ -9,11 +9,7 @@ import java.util.Timer;
 public class ContinueScreenController {
     private Timer timer;
 
-
-
-
     public void initialize(){
-
         Singleton language = Singleton.getInstance();
         if (!language.getIsEnglish()) {
             submitAbort.setText("Annuleren");
