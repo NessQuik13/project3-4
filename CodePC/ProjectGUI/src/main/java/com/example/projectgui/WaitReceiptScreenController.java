@@ -8,7 +8,6 @@ import javafx.scene.control.ProgressBar;
 import java.io.IOException;
 
 public class WaitReceiptScreenController {
-    private AnimationTimer progressTimer;
     PrinterThread print = new PrinterThread();
     Thread printThread = new Thread(print);
     @FXML
@@ -27,11 +26,11 @@ public class WaitReceiptScreenController {
         }
         printThread.start();
 
-        progressTimer = new AnimationTimer() {
+        AnimationTimer progressTimer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                double currentProgress =  progressBar.getProgress();
-                if(currentProgress + 0.0010f > 1.0f){
+                double currentProgress = progressBar.getProgress();
+                if (currentProgress + 0.0005f > 1.0f) {
                     this.stop();
                     SceneController controller = SceneController.getInstance();
                     try {
@@ -39,9 +38,8 @@ public class WaitReceiptScreenController {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-                else {
-                    currentProgress += 0.005 ;
+                } else {
+                    currentProgress += 0.0005;
                 }
                 progressBar.setProgress(currentProgress);
             }

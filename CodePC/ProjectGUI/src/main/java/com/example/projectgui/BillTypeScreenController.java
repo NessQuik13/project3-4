@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import java.io.IOException;
 public class BillTypeScreenController {
+    public static boolean billTypeSelected = false;
     @FXML
     private Label T1;
     public void initialize() {
@@ -26,7 +27,6 @@ public class BillTypeScreenController {
             }
             return;
         }
-
         try {
             controller.setScene("SubmitRequestScreen.fxml");
         } catch (IOException e) {
@@ -76,6 +76,7 @@ public class BillTypeScreenController {
     @FXML
     protected void submitReturnAction() {
         SceneController controller = SceneController.getInstance();
+        billTypeSelected = false;
         try {
             controller.setScene("WithdrawScreen.fxml");
         } catch (IOException e) {
@@ -87,6 +88,7 @@ public class BillTypeScreenController {
     @FXML
     protected void submitAbortAction() {
         SceneController controller = SceneController.getInstance();
+        billTypeSelected = false;
         ArduinoControls.abort();
         try {
             controller.setScene("LanguageScreen.fxml");
@@ -104,15 +106,15 @@ public class BillTypeScreenController {
         int curBills50 = 10 - ArduinoControls.getDispensed50();
         switch (preference) {
             case 10:
-                while (money >= 10  && bills10 < 10 && curBills10 > bills10) {
+                while (money >= 10  && bills10 < 10 && curBills10 >= bills10) {
                     money -= 10;
                     bills10 += 1;
                 }
-                while (money >= 20  && bills20 < 10 && curBills20 > bills20) {
+                while (money >= 20  && bills20 < 10 && curBills20 >= bills20) {
                     money -= 20;
                     bills20 += 1;
                 }
-                while (money >= 50 && bills50 < 10 && curBills50 > bills50 ) {
+                while (money >= 50 && bills50 < 10 && curBills50 >= bills50 ) {
                     money -= 50;
                     bills50 += 1;
                 }
@@ -123,15 +125,15 @@ public class BillTypeScreenController {
                     return 1;
                 }
             case 20:
-                while (money >= 20 && bills20 < 10 && curBills20 > bills20) {
+                while (money >= 20 && bills20 < 10 && curBills20 >= bills20) {
                     money -= 20;
                     bills20 += 1;
                 }
-                while (money >= 50 && bills50 < 10 && curBills50 > bills50) {
+                while (money >= 50 && bills50 < 10 && curBills50 >= bills50) {
                     money -= 50;
                     bills50 += 1;
                 }
-                while (money >= 10 && bills10 < 10 && curBills10 > bills10) {
+                while (money >= 10 && bills10 < 10 && curBills10 >= bills10) {
                     money -= 10;
                     bills10 += 1;
                 }
@@ -142,15 +144,15 @@ public class BillTypeScreenController {
                     return 1;
                 }
             case 50:
-                while (money >= 50 && bills50 < 10 && curBills50 > bills50) {
+                while (money >= 50 && bills50 < 10 && curBills50 >= bills50) {
                     money -= 50;
                     bills50 += 1;
                 }
-                while (money >= 20 && bills20 < 10 && curBills20 > bills20) {
+                while (money >= 20 && bills20 < 10 && curBills20 >= bills20) {
                     money -= 20;
                     bills20 += 1;
                 }
-                while (money >= 10 && bills10 < 10 && curBills10 > bills10) {
+                while (money >= 10 && bills10 < 10 && curBills10 >= bills10) {
                     money -= 10;
                     bills10 += 1;
                 }
@@ -164,6 +166,7 @@ public class BillTypeScreenController {
         SubmitRequestScreenController.setBills10Dispense(bills10 + ArduinoControls.getDispensed10());
         SubmitRequestScreenController.setBills20Dispense(bills20 + ArduinoControls.getDispensed20());
         SubmitRequestScreenController.setBills50Dispense(bills50 + ArduinoControls.getDispensed50());
+        billTypeSelected = true;
         return 0;
     }
 }

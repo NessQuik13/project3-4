@@ -39,6 +39,9 @@ boolean eatCard = false;
 boolean ejectCard = false;
 boolean dipsenseBills = false;
 boolean print = false;
+boolean refillStatus = false;
+// refill pin
+#define refillButton 4
 // setting up stepper
 int distanceBills = 1000;
 #define stopSwitch 7      // switch in the card reader
@@ -120,6 +123,7 @@ void setup() {
         key.keyByte[i] = 0xFF;
     }
     pinMode(stopSwitch, INPUT_PULLUP);  // switch pin as input
+    pinMode(refillButton, INPUT_PULLUP);
     stepper.setMaxSpeed(1000);          // set max speed
     stepper.setAcceleration(500.0);      // set accel
     dispStepper1.setMaxSpeed(1000);          // set max speed
@@ -145,6 +149,12 @@ void loop() {
     //     delay(1000);
     // }
     // dispenserHome();
+    while (refillStatus) {
+        if (!digitalRead(refillButton)) {
+            Serial.println("Rrefilled");
+            refillStatus = false;
+        }
+    }
     
     if (print) {
         receiptPrinter(printTime, printAccount, printAmount);
@@ -249,11 +259,12 @@ void processInputs(String input) {
         return;
     }
     if (input.startsWith("Cdis")) { // test version
-        String b10 = input.substring(5,6);
+        Serial.println("R" + input);
+        String b10 = input.substring(4,6);
         bills10 = b10.toInt();
-        String b20 = input.substring(7,8);
+        String b20 = input.substring(6,8);
         bills20 = b20.toInt();
-        String b50 = input.substring(9,10);
+        String b50 = input.substring(8,10);
         bills50 = b50.toInt();
         dipsenseBills = true;
         return;
@@ -264,6 +275,11 @@ void processInputs(String input) {
         printAccount = input.substring(26, 42);
         printAmount = input.substring(41);
         print = true;
+        return;
+    }
+    if (input.equals("Crefill")) {
+        refillStatus = true;
+        return;
     }
 }
 // reads the info on the card and sends it over the serial connection
@@ -351,12 +367,15 @@ void dispense(int ten, int twenty, int fifty) {
 void dispenserHome() {
     dispStepper1.moveTo(-50);
     dispStepper1.runToPosition();
+    delay(1000);
     dispStepper1.setCurrentPosition(0);
     dispStepper2.moveTo(-50);
     dispStepper2.runToPosition();
+    delay(1000);
     dispStepper2.setCurrentPosition(0);
     dispStepper3.moveTo(50);
     dispStepper3.runToPosition();
+    delay(1000);
     dispStepper3.setCurrentPosition(0);
 }
 

@@ -9,8 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class FinishScreenController {
-
-
     @FXML
     private Label T1;
     @FXML
@@ -29,6 +27,15 @@ public class FinishScreenController {
             public void run() {
                 Platform.runLater(() -> {
                     SceneController controller = SceneController.getInstance();
+                    if (ArduinoControls.getDispensed50() == 10 || ArduinoControls.getDispensed20() == 10 || ArduinoControls.getDispensed10() == 10) {
+                        try {
+                            System.out.println("empty restock");
+                            controller.setScene("RestockScreen.fxml");
+                        }catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
 
                     try {
                         controller.setScene("LanguageScreen.fxml");
@@ -38,6 +45,5 @@ public class FinishScreenController {
                 });
             }
         },8000);
-        Platform.runLater(ArduinoControls::abort);
     }
 }

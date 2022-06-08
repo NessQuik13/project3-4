@@ -9,7 +9,10 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class SubmitRequestScreenController extends WithdrawScreenController {
+import static com.example.projectgui.BillTypeScreenController.billTypeSelected;
+
+public class SubmitRequestScreenController extends WithdrawScreenController implements Runnable {
+
     private static int bills10Dispense = 0;
     private static int bills20Dispense = 0;
     private static int bills50Dispense = 0;
@@ -42,8 +45,8 @@ public class SubmitRequestScreenController extends WithdrawScreenController {
             submitAbort.setText("Annuleren");
             submitYes.setText("Ja");
             submitNo.setText("Nee");
+        }
 
-    }
     }
 
     @FXML
@@ -59,16 +62,19 @@ public class SubmitRequestScreenController extends WithdrawScreenController {
         System.out.println(Response);
 
         if (Response == 200) {
-            BillTypeScreenController.calculateBills(50);
+            if (!billTypeSelected) {
+                BillTypeScreenController.calculateBills(50);
+            }
             SceneController controller = SceneController.getInstance();
             try {
-                controller.setScene("ContinueScreen.fxml");
+                controller.setScene("WaitMoneyScreen.fxml");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             displayBalance = displayBalance - Geld;
             receiptAmount = Geld;
-            Platform.runLater(() -> {ArduinoControls.dispense(bills10Dispense, bills20Dispense, bills50Dispense);});
+            Thread dispenseThread = new Thread(this);
+            dispenseThread.start();
         }
     }
 
@@ -95,5 +101,14 @@ public class SubmitRequestScreenController extends WithdrawScreenController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void run() {
+        ArduinoControls.dispense(bills10Dispense, bills20Dispense, bills50Dispense);
+        if (billTypeSelected) {
+            billTypeSelected = false;
+        }
+
     }
 }
