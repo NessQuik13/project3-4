@@ -122,8 +122,8 @@ void loop() {
     // runs the eatingCard function 
     // dispense(1,2,3);
     // dispenserHome(); 
-    receiptPrinter("03/06/2022", "GRKRIV000123401", "699");
-    delay(10000);
+    // receiptPrinter("03/06/2022", "GRKRIV000123401", "699");
+    // delay(10000);
     if (eatCard) {
         eatingCard();
     }

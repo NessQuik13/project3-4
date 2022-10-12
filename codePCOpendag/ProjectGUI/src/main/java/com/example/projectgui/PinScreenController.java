@@ -41,12 +41,12 @@ public class PinScreenController  implements Runnable {
     @FXML
     protected void submitPinAction() {
         try {
-            API.balance(ArduinoControls.accCountry,ArduinoControls.accBank,ArduinoControls.accNumber, pincodePinScreen);
-        } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
+            API.balance(pincodePinScreen);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
-        int Response = Integer.parseInt(API.balanceResponse);
+        int Response = API.balanceResponse;
         System.out.println(Response);
         int Attempts = API.loginAttemptsLeft;
         System.out.println(Attempts);
@@ -61,7 +61,6 @@ public class PinScreenController  implements Runnable {
                 e.printStackTrace();
             }
         }
-
         else if(Attempts == 0){
             if (!language.getIsEnglish()) {
                 Warning.setText("Kaart uitwerpen.....");
@@ -71,10 +70,11 @@ public class PinScreenController  implements Runnable {
                 Warning.setText("Ejecting card......");
             }
             pinField.setText("");
+            API.resetlogin();
             ArduinoControls.ejectCard();
         }
         else {
-            if (Attempts >= 2) {
+            if (Attempts > 0) {
                 if (!language.getIsEnglish()) {
                     Warning.setText("Foute pin, " + Attempts + " pogingen over");
                 }
@@ -165,7 +165,7 @@ public class PinScreenController  implements Runnable {
             }
         }
         ArduinoControls.sendData("CstopKey\n");
-        pincodePinScreen= password;
+        pincodePinScreen = password;
         Platform.runLater(this::submitPinAction);
     }
 }

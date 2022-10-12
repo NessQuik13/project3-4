@@ -91,7 +91,7 @@ public class WithdrawScreenController extends API{
     @FXML
     protected void submitAmountAction(){
         if (Geld > currentlyLoaded()) {
-            Limit.setText("Amount exceeds current money avaible in atm: " + currentlyLoaded());
+            Limit.setText("Amount exceeds current money available in atm: " + currentlyLoaded());
             Singleton language = Singleton.getInstance();
             if (!language.getIsEnglish()) {
                 Limit.setText("Bedrag is hoger dan de automaat kan leveren: " + currentlyLoaded());

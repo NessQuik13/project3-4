@@ -168,9 +168,9 @@ public class ArduinoControls {
     //dispense bills
     static void dispense(int b10, int b20, int b50) {
         System.out.println("Dispensing bills");
-        String sb10 = "";
-        String sb20 = "";
-        String sb50 = "";
+        String sb10;
+        String sb20;
+        String sb50;
         if (b10 < 10) {
             sb10 = "0" + b10;
         } else {sb10 = String.valueOf(b10);}

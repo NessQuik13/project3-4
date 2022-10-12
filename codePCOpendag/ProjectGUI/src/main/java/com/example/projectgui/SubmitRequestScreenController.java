@@ -54,11 +54,11 @@ public class SubmitRequestScreenController extends WithdrawScreenController impl
     @FXML
     protected void submitYesAction(){
         try {
-            API.withdraw(ArduinoControls.accCountry, ArduinoControls.accBank, ArduinoControls.accNumber, PinScreenController.pincodePinScreen, Geld);
-        } catch (URISyntaxException | IOException | InterruptedException | ParseException e) {
+            API.withdraw(Geld);
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        int Response = Integer.parseInt(API.withdrawResponse);
+        int Response = API.withdrawResponse;
         System.out.println(Response);
 
         if (Response == 200) {
