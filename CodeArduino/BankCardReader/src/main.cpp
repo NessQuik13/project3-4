@@ -15,9 +15,11 @@
 #include <Keypad.h>
 #include "Adafruit_Thermal.h"
 #include <SoftwareSerial.h>
-
-#define TX_PIN 1 // Arduino transmit labeled RX on printer
-#define RX_PIN 0 // Arduino receive labeled TX on printer
+#include <stdio.h>      /* printf, fgets */
+#include <stdlib.h>
+#include <string.h>
+#define TX_PIN 16 // Arduino transmit labeled RX on printer
+#define RX_PIN 17 // Arduino receive labeled TX on printer
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN); // Declare SoftwareSerial obj first
 Adafruit_Thermal printer(&mySerial);     // Pass addr to printer constructor
@@ -35,6 +37,11 @@ boolean checkCard = false;
 boolean getKeyInput = false;
 boolean eatCard = false;
 boolean ejectCard = false;
+boolean dipsenseBills = false;
+boolean print = false;
+boolean refillStatus = false;
+// refill pin
+#define refillButton 4
 // setting up stepper
 int distanceBills = 1000;
 #define stopSwitch 7      // switch in the card reader
@@ -48,23 +55,23 @@ AccelStepper stepper = AccelStepper(motorInterfaceType, motorPin1, motorPin3, mo
 #define motorPin6  31      // IN2 on the ULN2003 driver
 #define motorPin7  32     // IN3 on the ULN2003 driver
 #define motorPin8  33     // IN4 on the ULN2003 driver
-#define motorInterfaceType 8
 AccelStepper dispStepper1 = AccelStepper(motorInterfaceType, motorPin5, motorPin7, motorPin6, motorPin8);
 #define motorPin9  36      // IN1 on the ULN2003 driver
 #define motorPin10  37     // IN2 on the ULN2003 driver
 #define motorPin11  38     // IN3 on the ULN2003 driver
 #define motorPin12  39     // IN4 on the ULN2003 driver
-#define motorInterfaceType 8
 AccelStepper dispStepper2 = AccelStepper(motorInterfaceType, motorPin9, motorPin11, motorPin10, motorPin12);
 #define motorPin13  42      // IN1 on the ULN2003 driver
 #define motorPin14  43     // IN2 on the ULN2003 driver
 #define motorPin15  44     // IN3 on the ULN2003 driver
 #define motorPin16  45     // IN4 on the ULN2003 driver
-#define motorInterfaceType 8
 AccelStepper dispStepper3 = AccelStepper(motorInterfaceType, motorPin13, motorPin15, motorPin14, motorPin16);
+int stepper1Steps[] = {-50, 750, 1100, 1500, 1900, 2300, 2600, 2900, 3200, 3500, 3900};
+int stepper2Steps[] = {-50, 800, 1100, 1400, 1900, 2300, 2600, 2900, 3200, 3500, 3900};
+int stepper3Steps[] = {50, -750, -1100, -1500, -1800, -2200, -2450, -2800, -3100, -3400, -3800};
 // creating the card
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
-int block = 2;                      // determines the block that we will read from
+int block = 1;                      // determines the block that we will read from
 byte len = 18;                      // determines the length of the array
 int bytesToRead = 16;               // the amount of bytes to read
 byte trailerBlock = 7;              // sets the length of the trailer block
@@ -83,6 +90,15 @@ char keys[rowNum][columnNum] = {    // layout of the keypad
 byte pinRows[rowNum] = {23, 25, 27, 29}; 
 byte pinColumn[columnNum] = {22, 24, 26, 28};
 Keypad keypad = Keypad( makeKeymap(keys), pinRows, pinColumn, rowNum, columnNum); // setup of the keypad object
+// the amount of bills that need to be dispensed
+
+int bills10 = 0;
+int bills20 = 0;
+int bills50 = 0;
+// time
+String printTime = "";
+String printAccount = "";
+String printAmount = "";
 // all the functions used
 boolean readCardDetails();
 String keypadInputs();
@@ -98,6 +114,7 @@ void setup() {
     Serial.begin(115200); // Initialize serial communications with the PC
     while (!Serial);    // Do nothing if no serial port is opened
     SPI.begin();        // Init SPI bus
+    mySerial.begin(9600);
     printer.begin();
     mfrc522.PCD_Init(); // Init MFRC522 card    
     // Prepare the key (used both as key A and as key B)
@@ -106,12 +123,13 @@ void setup() {
         key.keyByte[i] = 0xFF;
     }
     pinMode(stopSwitch, INPUT_PULLUP);  // switch pin as input
+    pinMode(refillButton, INPUT_PULLUP);
     stepper.setMaxSpeed(1000);          // set max speed
     stepper.setAcceleration(500.0);      // set accel
     dispStepper1.setMaxSpeed(1000);          // set max speed
-    dispStepper1.setAcceleration(500.0);      // set accel
+    dispStepper1.setAcceleration(5000.0);      // set accel
     dispStepper2.setMaxSpeed(1000);          // set max speed
-    dispStepper2.setAcceleration(500.0);      // set accel
+    dispStepper2.setAcceleration(5000.0);      // set accel
     dispStepper3.setMaxSpeed(1000);          // set max speed
     dispStepper3.setAcceleration(500.0);      // set accel
 }
@@ -119,15 +137,22 @@ void setup() {
 void loop() {
     unsigned long currentMillis = millis();
     unsigned long previousMillis = currentMillis;
-    // runs the eatingCard function 
-    // dispense(1,2,3);
-    // dispenserHome(); 
-    // receiptPrinter("03/06/2022", "GRKRIV000123401", "699");
-    // delay(10000);
+    while (refillStatus) {
+        if (!digitalRead(refillButton)) {
+            Serial.println("Rrefilled");
+            refillStatus = false;
+        }
+    }
+    // if print is true it will print a receipt
+    if (print) {
+        receiptPrinter(printTime, printAccount, printAmount);
+        print = false;
+    }
+    // if eatCard is true it will eat the card
     if (eatCard) {
         eatingCard();
     }
-    // eject card
+    // if ejectCard is true it will eject the card
     if (ejectCard) {
         ejectingCard();
     }
@@ -138,6 +163,7 @@ void loop() {
         if (readCardDetails()) {
             checkCard = false;
         }
+        // timeout 
         if (currentMillis - previousMillis >= 3500) {
             previousMillis = currentMillis;
             Serial.println("CItimeout");
@@ -150,6 +176,10 @@ void loop() {
         if (key != NO_KEY) {        // checks if key has a key stored, if so it sends it over the serial connection
             Serial.println("KP" + (String)key);
         }
+    }
+    // if dispenesBill is true it will dispense the set bills
+    if (dipsenseBills) {
+        dispense(bills10, bills20, bills50);
     }
 }
 /*==================== functions =====================================================================================*/
@@ -169,55 +199,81 @@ void serialEvent(){
 // processes the input string by reading it and comparing it to know inputs
 // if it finds one that fits it will execute that response
 void processInputs(String input) {
-    if (input.equals("")) { return;}
-    if (input.equals("ping")) {
+    if (input.equals("")) { // empty string does nothing
+        return;
+        }
+    if (input.equals("ping")) { // pong
         Serial.println("pong"); 
         return;
     }
-    if (input.equals("AuthoriseArduino")) {
+    if (input.equals("AuthoriseArduino")) { // authorisation check
         Serial.println("RMega2560Ready");
         return;
     }
-    if (input.equals("Creset")) {
+    if (input.equals("Creset")) { // resets the state of all possible functions
+        stringComplete = false;
+        inputString = "";
         checkCard = false;
         getKeyInput = false;
         eatCard = false;
         ejectCard = false;
+        dipsenseBills = false;
+        print = false;
+        refillStatus = false;
         Serial.println("Rresetting");
         return;
-        // add future functions
     }
-    if (input.equals("CcardInfo")) {
+    if (input.equals("CcardInfo")) { // enables the checkCard 
         Serial.println("RgetCI");
         checkCard = true;
         return;
     }
-    if (input.equals("CcardStop")) {
+    if (input.equals("CcardStop")) { // disables the checkCard
         Serial.println("RstopCI");
         checkCard = false;
         return;
     }
-    if (input.equals("CgetKey")) {
+    if (input.equals("CgetKey")) { // enables the get keypad input
         Serial.println("RgetKey");
         getKeyInput = true;
         return;
     }
-    if (input.equals("CstopKey")) {
+    if (input.equals("CstopKey")) { // disables getting the keypad inputs
         Serial.println("RstopKey");
         getKeyInput = false;
         return;
     }
-    if (input.equals("CeatCard")) {
+    if (input.equals("CeatCard")) { // enables eatCard
         Serial.println("ReatingCard");
         eatCard = true;
         return;
     }
-    if (input.equals("CejectCard")) {
+    if (input.equals("CejectCard")) { // enables ejectCard
         ejectCard = true;
         return;
     }
-    if (input.substring(0,6).equals("Cprint")) {
-        
+    if (input.startsWith("Cdis")) { // convert the input to bills to dispense
+        Serial.println("R" + input);
+        String b10 = input.substring(4,6);
+        bills10 = b10.toInt();
+        String b20 = input.substring(6,8);
+        bills20 = b20.toInt();
+        String b50 = input.substring(8,10);
+        bills50 = b50.toInt();
+        dipsenseBills = true;
+        return;
+    }
+    if (input.startsWith("Cprint")) { // converts in the input to printable text
+        Serial.println("R" + input);
+        printTime = input.substring(6,25);
+        printAccount = input.substring(26, 42);
+        printAmount = input.substring(41);
+        print = true;
+        return;
+    }
+    if (input.equals("Crefill")) {
+        refillStatus = true;
+        return;
     }
 }
 // reads the info on the card and sends it over the serial connection
@@ -285,89 +341,100 @@ void ejectingCard() {
 }
 // moves the steppers to dispense the wanted amount of money
 void dispense(int ten, int twenty, int fifty) {
-    // for 50 euro bills
-    for(int i = 0; i < fifty; i++) {
-        dispStepper1.moveTo(dispStepper1.currentPosition() - distanceBills);
-        dispStepper1.runToPosition();
-    }
-    for(int i = 0;i < twenty; i++) {
-        dispStepper2.moveTo(dispStepper2.currentPosition() + distanceBills);
-        dispStepper2.runToPosition();
-    }
-    for(int i = 0;i < ten; i++) {
-        dispStepper3.moveTo(dispStepper3.currentPosition() - distanceBills);
-        dispStepper3.runToPosition();
-    }
-}
-// moves the steppers back home after filling
-void dispenserHome() {
-    dispStepper1.moveTo(0);
+    // uses the stepper steps arrays to determine what distance to move
+    dispStepper1.moveTo(stepper1Steps[ten]);
     dispStepper1.runToPosition();
-    dispStepper2.moveTo(0);
+    
+    dispStepper2.moveTo(stepper2Steps[twenty]);
     dispStepper2.runToPosition();
-    dispStepper3.moveTo(0);
-    dispStepper3.runToPosition();   
+    
+    dispStepper3.moveTo(stepper3Steps[fifty]);
+    dispStepper3.runToPosition();
+    // homes the steppers 
+    dispenserHome();
+    // resets the bills 
+    bills10 = 0;
+    bills20 = 0;
+    bills50 = 0;
+    Serial.println("RdTrue");
+    dipsenseBills = false;
 }
-
+// moves the steppers back home
+void dispenserHome() {
+    dispStepper1.moveTo(-50);
+    dispStepper1.runToPosition();
+    delay(1000);
+    dispStepper1.setCurrentPosition(0);
+    dispStepper2.moveTo(-50);
+    dispStepper2.runToPosition();
+    delay(1000);
+    dispStepper2.setCurrentPosition(0);
+    dispStepper3.moveTo(50);
+    dispStepper3.runToPosition();
+    delay(1000);
+    dispStepper3.setCurrentPosition(0);
+}
+// prints the receipt
 void receiptPrinter(String dateInput , String account, String amountPinned) {
-  printer.wake();
-  printer.setDefault();
+    String acc = account.substring(9,15);
+    printer.wake();
+    printer.setDefault();
 
-  printer.setSize('M');
-  printer.justify('C');
-  printer.boldOn();
+    printer.setSize('M');
+    printer.justify('C');
+    printer.boldOn();
 
-  printer.println(F("Kopie Kaarthouder"));
+    printer.println(F("Kopie Kaarthouder"));
   
-  printer.setLineHeight(50);
-  printer.setSize('L');
+    printer.setLineHeight(50);
+    printer.setSize('L');
   
-  printer.println(F("KR-IV"));
+    printer.println(F("KR-IV"));
 
-  printer.setSize('S');
-  printer.setLineHeight(); //default
-  printer.boldOff();
-  printer.println(F("Wijnhaven 107"));
-  printer.println(F("3011 WN ROTTERDAM"));
+    printer.setSize('S');
+    printer.setLineHeight(); //default
+    printer.boldOff();
+    printer.println(F("Wijnhaven 107"));
+    printer.println(F("3011 WN ROTTERDAM"));
 
-  printer.justify('L');
-  printer.setLineHeight(50);
+    printer.justify('L');
+    printer.setLineHeight(50);
 
-  printer.println(F("ATM: WHR01"));
+    printer.println(F("ATM: WHR01"));
 
-  printer.setLineHeight(); //default
+    printer.setLineHeight(); //default
   
-  printer.println(F("Geldopname"));
-  printer.println(F("Kabinet Rutte IV"));
-  printer.println(F("Kaart: xxxxxxxxxx1234"));
+    printer.println(F("Geldopname"));
+    printer.println(F("Kabinet Rutte IV"));
+    printer.println("Kaart: xxxxxxxxxx" + acc);
 
-  printer.setSize('L');
-  printer.boldOn();
-  printer.setLineHeight(50);
+    printer.setSize('L');
+    printer.boldOn();
+    printer.setLineHeight(50);
 
-  printer.println(F("TRANSACTIE"));
+    printer.println(F("TRANSACTIE"));
 
-  printer.setSize('S');
-  printer.boldOff();
-  printer.setLineHeight(); //default
+    printer.setSize('S');
+    printer.boldOff();
+    printer.setLineHeight(); //default
 
-  printer.println(dateInput);
+    printer.println(dateInput);
 
-  printer.setLineHeight(50);
-  printer.setSize('M');
-  printer.boldOn();
+    printer.setLineHeight(50);
+    printer.setSize('M');
+    printer.boldOn();
 
-  printer.print(F("Totaal: "));
-  printer.print(amountPinned);
-  printer.print(F(" EUR\n"));
+    printer.print(F("Totaal: "));
+    printer.print(amountPinned);
+    printer.print(F(" EUR\n"));
 
-  printer.justify('C');
-  printer.setSize('L');
+    printer.justify('C');
+     printer.setSize('L');
 
-  printer.println(F("AKKOORD"));
+    printer.println(F("AKKOORD"));
 
-  printer.feed(2);
+    printer.feed(4);
 
-  printer.sleep();
-  Serial.println("RreceiptPrinted");
+    printer.sleep();
+    Serial.println("RreceiptPrinted");
 }
