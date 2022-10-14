@@ -61,7 +61,7 @@ public class ArduinoControls {
             return false;
         }
         // setting up the parameters for the serial connection
-        arduinoPort.setComPortParameters(115200, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
+        arduinoPort.setComPortParameters(9600, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY);
         arduinoPort.setComPortTimeouts(SerialPort.TIMEOUT_SCANNER, 0,0);
         // if the port successfully opens it will also start a new thread that scans the inputs. For more details check com.example.projectgui.ArduinoInputs
         if (arduinoPort.openPort()){

@@ -72,6 +72,12 @@ public class PinScreenController  implements Runnable {
             pinField.setText("");
             API.resetlogin();
             ArduinoControls.ejectCard();
+            try {
+                SceneController controller = SceneController.getInstance();
+                controller.setScene("LanguageScreen.fxml");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         else {
             if (Attempts > 0) {

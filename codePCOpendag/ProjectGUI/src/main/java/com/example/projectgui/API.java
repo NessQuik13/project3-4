@@ -1,19 +1,7 @@
 package com.example.projectgui;
 
 import java.io.*;
-import java.net.ConnectException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.net.URISyntaxException;
-import java.net.URI;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
+import java.io.IOException;
 
 public class API {
     private static String hardCodedPin = "1234";
@@ -25,25 +13,19 @@ public class API {
         loginAttemptsLeft = 3;
     }
 
-        //    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, ParseException {
-//        //balance("GR","KRIV","GRKRIV0000123401", 1234);
-//        balance("T1","NERD","RUNERD0000432100", 4321);
-//        //withdraw("GR","KRIV","GRKRIV0000123401",1234, 100);
-//        //withdraw("GR","KRIV","GRKRIV0000123401",1234, 100);
-//        //test();
-//    }
-        static public int readBalance() throws IOException{
-                FileReader reader = new FileReader("balance.txt");
-                BufferedReader bufferedReader = new BufferedReader(reader);
-                String line;
-                int balance = 0;
-                while ((line = bufferedReader.readLine()) != null) {
-                    System.out.println(line);
-                    balance = Integer.parseInt(line);
-                }
-                reader.close();
-                return balance;
+    static public int readBalance() throws IOException{
+        FileReader reader = new FileReader("balance.txt");
+        BufferedReader bufferedReader = new BufferedReader(reader);
+        String line;
+        int balance = 0;
+        while ((line = bufferedReader.readLine()) != null) {
+            //System.out.println(line);
+            balance = Integer.parseInt(line);
         }
+        reader.close();
+        return balance;
+    }
+
         static public void writebalance(int input) throws IOException {
             FileWriter writer = new FileWriter("balance.txt");
             writer.write(String.valueOf(input));
@@ -54,6 +36,7 @@ public class API {
             if (!pin.equals(hardCodedPin)) {
                 balanceResponse = 401;
                 loginAttemptsLeft -= 1;
+                return;
             }
             int balance = readBalance();
             balanceResponse = 200;
@@ -63,13 +46,13 @@ public class API {
         static public void withdraw(int amount) throws IOException {
             int balance = readBalance();
             int newBalance = balance - amount;
-            if (newBalance < 0) {
+            System.out.println("new balance" + newBalance);
+            if (newBalance >= 0) {
+                displayBalance = balance;
                 writebalance(newBalance);
                 withdrawResponse = 200;
                 return;
             }
             withdrawResponse = 401;
-
-
         }
     }

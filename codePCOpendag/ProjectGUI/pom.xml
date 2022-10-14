@@ -127,7 +127,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.projectgui/HelloApplication</mainClass>
+                            <mainClass>com.example.projectgui/Main</mainClass>
                         </configuration>
                     </execution>
                 </executions>
