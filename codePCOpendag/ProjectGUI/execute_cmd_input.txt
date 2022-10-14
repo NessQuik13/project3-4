@@ -1,0 +1,1 @@
+java -jar --module-path ??\openjfx-18.0.1_windows-x64_bin-sdk\javafx-sdk-18.0.1\lib --add-modules=ALL-MODULE-PATH ProjectGUI_jar.jar
