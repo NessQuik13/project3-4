@@ -11,24 +11,24 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-controls:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-controls:win:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-graphics:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-graphics:win:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-base:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-base:win:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-fxml:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-fxml:win:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-web:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-web:win:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-media:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.openjfx:javafx-media:win:18.0.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.controlsfx:controlsfx:11.1.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: com.dlsc.formsfx:formsfx-core:11.5.0" level="project" />
-    <orderEntry type="library" exported="" name="Maven: net.synedra:validatorfx:0.3.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.kordamp.ikonli:ikonli-javafx:12.3.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.kordamp.ikonli:ikonli-core:12.3.1" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-controls:win:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-graphics:win:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-base:win:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:win:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-web:win:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.openjfx:javafx-media:win:18.0.1" level="project" />
+    <orderEntry type="library" name="Maven: org.controlsfx:controlsfx:11.1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.dlsc.formsfx:formsfx-core:11.5.0" level="project" />
+    <orderEntry type="library" name="Maven: net.synedra:validatorfx:0.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.kordamp.ikonli:ikonli-javafx:12.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.kordamp.ikonli:ikonli-core:12.3.1" level="project" />
+    <orderEntry type="library" name="Maven: org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0" level="project" />
     <orderEntry type="library" name="Maven: eu.hansolo:tilesfx:17.1.9" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: eu.hansolo:toolbox:17.0.22" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Maven: eu.hansolo:toolboxfx:17.0.28" level="project" />
